@@ -1,41 +1,47 @@
-const callerNumber = '1234567890';
-const callerId = 'client:alice';
+exports.handler = function (context, event, callback) {
+  // console.info(`Event object:`, JSON.stringify(event));
+  console.info(`Call Out: Event object.identity:`, event.identity);
+  console.info(`Call Out: Event object.To:`, event.To);
+  console.info(`Call Out: Event object.From:`, event.From);
 
-exports.handler = function(context, event, callback) {
-  const twiml = new Twilio.twiml.VoiceResponse();
+  try {
+    const voiceResponse = new Twilio.twiml.VoiceResponse();
 
-  var to = event.to;
-  if (!to) {
-  	twiml.say('Congratulations! You have made your first call! Good bye.');
-  } else if (isNumber(to)) {
-  	const dial = twiml.dial({callerId : callerNumber});
-    dial.number(to);
-  } else {
-  	const dial = twiml.dial({callerId : callerId});
-  	dial.client(to);
-  }
-
-  callback(null, twiml);
-};
-
-function isNumber(to) {
-  if(to.length == 1) {
-    if(!isNaN(to)) {
-      console.log("It is a 1 digit long number" + to);
-      return true;
+    // If the identity is passed in, then dial the client.
+    if (event.identity) {
+      to = event.identity;
+      from = event.From;
+      console.info(`Call Out: Dialling Client ${to} with Caller ID ${from}`);
+      voiceResponse.dial({ callerId: from }).client(to);
+      return callback(null, voiceResponse);
     }
-  } else if(String(to).charAt(0) == '+') {
-    number = to.substring(1);
-    if(!isNaN(number)) {
-      console.log("It is a number " + to);
-      return true;
-    };
-  } else {
-    if(!isNaN(to)) {
-      console.log("It is a number " + to);
-      return true;
+
+    // If the SIP domain is passed in, then dial the SIP domain.
+    if (event.domain) {
+      to = `${event.To}@${event.domain}`;
+      from = event.From;
+      console.info(`Call Out: Dialling SIP ${to} with Caller ID ${from}`);
+      voiceResponse.dial({ callerId: from }).sip(to);
+      return callback(null, voiceResponse);
     }
+
+    // If no "To" number is provided, then just echo the message back to the caller.
+    if (event.To === '') {
+      let from = event.From;
+      console.info(`Call Out: Echoing message to caller with Caller ID ${from}`);
+      voiceResponse.say('Congratulations! You have made your first Client call! Good bye.');
+      return callback(null, voiceResponse);
+    }
+
+    // If no identity or SIP domain is passed in and there is a To number, then dial the number.
+    if (!event.identity && !event.domain && event.To) {  // Possibly redundant check later
+      let to = event.To;
+      let from = event.From;
+      console.info(`Call Out: Dialling Number ${to} with Caller ID ${from}`);
+      voiceResponse.dial({ callerId: from }).number(to);
+      return callback(null, voiceResponse);
+    }
+  } catch (error) {
+    return callback(`Call Out: Error with call-out: ${error}`);
   }
-  console.log("not a number");
-  return false;
 }
