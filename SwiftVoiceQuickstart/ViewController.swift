@@ -460,12 +460,22 @@ extension ViewController: PushKitEventDelegate {
     }
     
     func incomingPushReceived(payload: PKPushPayload, completion: @escaping () -> Void) {
+        NSLog("Received push notification: \(payload.dictionaryPayload)")
+        
+        guard let aps = payload.dictionaryPayload["aps"] as? [String: Any] else {
+            NSLog("Error: Invalid push notification payload structure")
+            completion()
+            return
+        }
+        
         // The Voice SDK will use main queue to invoke `cancelledCallInviteReceived:error:` when delegate queue is not passed
         TwilioVoiceSDK.handleNotification(payload.dictionaryPayload, delegate: self, delegateQueue: nil)
         
         if let version = Float(UIDevice.current.systemVersion), version < 13.0 {
             // Save for later when the notification is properly handled.
             incomingPushCompletionCallback = completion
+        } else {
+            completion()
         }
     }
 
@@ -483,6 +493,11 @@ extension ViewController: PushKitEventDelegate {
 extension ViewController: NotificationDelegate {
     func callInviteReceived(callInvite: CallInvite) {
         NSLog("callInviteReceived:")
+        
+        guard let _ = self.accessToken else {
+            NSLog("Error: Access token not available when receiving call invite")
+            return
+        }
         
         /**
          * The TTL of a registration is 1 year. The TTL for registration for this device/identity

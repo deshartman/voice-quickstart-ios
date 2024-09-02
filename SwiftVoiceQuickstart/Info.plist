@@ -49,6 +49,6 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>AccessTokenServerURL</key>
-	<string>https://swiftvoicequickstart-9043-dev.twil.io/access-token</string>
+	<string>https://des.ngrok.dev/access-token</string>
 </dict>
 </plist>
