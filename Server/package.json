@@ -1,6 +1,6 @@
 {
-  "name": "quickstart",
-  "version": "0.0.0",
+  "name": "SwiftVoiceQuickstart",
+  "version": "0.0.1",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -16,6 +16,6 @@
     "twilio-run": "^2.0.0"
   },
   "engines": {
-    "node": "10.17.0"
+    "node": "18"
   }
 }
