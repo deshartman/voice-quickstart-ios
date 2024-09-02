@@ -10,6 +10,8 @@ import AVFoundation
 import PushKit
 import CallKit
 import TwilioVoice
+import KeychainAccess
+
 
 let twimlParamTo = "to"
 
@@ -21,6 +23,7 @@ let kCachedBindingDate = "CachedBindingDate"
 class ViewController: UIViewController {
     
     private var accessToken: String?
+    let keychain = Keychain(service: "com.twilio.SwiftVoiceQuickstart")
 
     @IBOutlet weak var qualityWarningsToaster: UILabel!
     @IBOutlet weak var placeCallButton: UIButton!
@@ -77,22 +80,6 @@ class ViewController: UIViewController {
         toggleUIState(isEnabled: false, showCallControl: false)
         outgoingValue.delegate = self
         
-       fetchAccessToken { [weak self] success in
-           guard let self = self else { return }
-           DispatchQueue.main.async {
-               if success {
-                   self.toggleUIState(isEnabled: true, showCallControl: false)
-                   print("Access token fetched successfully")
-               } else {
-                   let alertController = UIAlertController(title: "Error",
-                                                           message: "Failed to fetch access token. The app may not function correctly.",
-                                                           preferredStyle: .alert)
-                   alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                   self.present(alertController, animated: true, completion: nil)
-               }
-           }
-       }
-        
         /* Please note that the designated initializer `CXProviderConfiguration(localizedName: String)` has been deprecated on iOS 14. */
         let configuration = CXProviderConfiguration(localizedName: "Voice Quickstart")
         configuration.maximumCallGroups = 2
@@ -116,10 +103,91 @@ class ViewController: UIViewController {
         }
     }
     
-    func fetchAccessToken(completion: @escaping (Bool) -> Void) {
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        checkForStoredEmail()
+    }
+    
+    func checkForStoredEmail() {
+        print("Checking for stored email...")
+        do {
+            print("Attempting to access keychain...")
+            if let storedEmail = try keychain.get("identity") {
+                print("Stored email found: \(storedEmail)")
+                fetchAccessTokenAndSetupCall()
+            } else {
+                print("No stored email found in keychain. Preparing to show email input popover...")
+                DispatchQueue.main.async {
+                    self.performSegue(withIdentifier: "showEmailPopover", sender: nil)
+                }
+            }
+        } catch {
+            print("Error accessing keychain: \(error)")
+            print("Error details: \(error.localizedDescription)")
+            print("Preparing to show email input popover due to error...")
+            DispatchQueue.main.async {
+                self.performSegue(withIdentifier: "showEmailPopover", sender: nil)
+            }
+        }
+        print("Finished checking for stored email.")
+    }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showEmailPopover",
+           let emailInputVC = segue.destination as? EmailInputViewController {
+            emailInputVC.completion = { [weak self] email in
+                self?.saveEmail(email)
+                self?.dismiss(animated: true) {
+                    self?.fetchAccessTokenAndSetupCall()
+                }
+            }
+        }
+    }
+    
+    func saveEmail(_ email: String) {
+        do {
+            try keychain.set(email, key: "identity")
+            print("Email saved: \(email)")
+        } catch {
+            print("Error saving email to keychain: \(error)")
+        }
+    }
+    
+    func fetchAccessTokenAndSetupCall() {
+        guard let identity = try? keychain.get("identity") else {
+            print("No identity found in keychain")
+            return
+        }
+        
+        fetchAccessToken(identity: identity) { [weak self] success in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if success {
+                    self.toggleUIState(isEnabled: true, showCallControl: false)
+                    print("Access token fetched successfully")
+                } else {
+                    let alertController = UIAlertController(title: "Error",
+                                                            message: "Failed to fetch access token. The app may not function correctly.",
+                                                            preferredStyle: .alert)
+                    alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alertController, animated: true, completion: nil)
+                }
+            }
+        }
+    }
+    
+    func fetchAccessToken(identity: String, completion: @escaping (Bool) -> Void) {
         guard let accessTokenServerURL = Bundle.main.object(forInfoDictionaryKey: "AccessTokenServerURL") as? String,
-              let url = URL(string: accessTokenServerURL) else {
+              var urlComponents = URLComponents(string: accessTokenServerURL) else {
             print("Invalid access token server URL")
+            completion(false)
+            return
+        }
+        
+        // Add identity as a query parameter
+        urlComponents.queryItems = [URLQueryItem(name: "identity", value: identity)]
+        
+        guard let url = urlComponents.url else {
+            print("Failed to create URL with identity")
             completion(false)
             return
         }

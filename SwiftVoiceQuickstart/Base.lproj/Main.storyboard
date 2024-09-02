@@ -125,11 +125,55 @@
                         <outlet property="placeCallButton" destination="Uic-jJ-PVN" id="oeG-C0-Aoq"/>
                         <outlet property="qualityWarningsToaster" destination="bYe-ax-z7H" id="nk7-Fe-Eh1"/>
                         <outlet property="speakerSwitch" destination="PCg-X1-dp2" id="QNC-aA-x2p"/>
+                        <segue destination="XYZ-AB-CDE" kind="presentation" identifier="showEmailPopover" modalPresentationStyle="formSheet" id="123-45-678"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="117.59999999999999" y="118.29085457271366"/>
+        </scene>
+        <!--Email Input View Controller-->
+        <scene sceneID="DEF-GH-IJK">
+            <objects>
+                <viewController id="XYZ-AB-CDE" customClass="EmailInputViewController" customModule="SwiftVoiceQuickstart" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="LMN-OP-QRS"/>
+                        <viewControllerLayoutGuide type="bottom" id="TUV-WX-YZA"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="BCD-EF-GHI">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter your email" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="JKL-MN-OPQ">
+                                <rect key="frame" x="20" y="318.5" width="335" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RST-UV-WXY">
+                                <rect key="frame" x="20" y="368.5" width="335" height="30"/>
+                                <state key="normal" title="Submit"/>
+                                <connections>
+                                    <action selector="submitButtonTapped:" destination="XYZ-AB-CDE" eventType="touchUpInside" id="987-65-432"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="JKL-MN-OPQ" firstAttribute="centerY" secondItem="BCD-EF-GHI" secondAttribute="centerY" id="ABC-DE-FGH"/>
+                            <constraint firstItem="JKL-MN-OPQ" firstAttribute="leading" secondItem="BCD-EF-GHI" secondAttribute="leading" constant="20" id="HIJ-KL-MNO"/>
+                            <constraint firstAttribute="trailing" secondItem="JKL-MN-OPQ" secondAttribute="trailing" constant="20" id="PQR-ST-UVW"/>
+                            <constraint firstItem="RST-UV-WXY" firstAttribute="top" secondItem="JKL-MN-OPQ" secondAttribute="bottom" constant="20" id="XYZ-12-345"/>
+                            <constraint firstItem="RST-UV-WXY" firstAttribute="leading" secondItem="BCD-EF-GHI" secondAttribute="leading" constant="20" id="678-90-123"/>
+                            <constraint firstAttribute="trailing" secondItem="RST-UV-WXY" secondAttribute="trailing" constant="20" id="456-78-901"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="emailTextField" destination="JKL-MN-OPQ" id="234-56-789"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="IJK-LM-NOP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="890" y="118"/>
         </scene>
     </scenes>
     <color key="tintColor" red="0.8862745098" green="0.1137254902" blue="0.1450980392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
