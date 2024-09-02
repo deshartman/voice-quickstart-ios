@@ -3,10 +3,12 @@
 > Please see our [iOS 13 Migration Guide](https://github.com/twilio/twilio-voice-ios/blob/Releases/iOS-13-Migration-Guide.md) for the latest information on iOS 13.
 
 ## Get started with Voice on iOS
+
 * [Quickstart](#quickstart) - Run the swift quickstart app
 * [Examples](#examples) - Sample applications
 
 ## References
+
 * [Access Tokens](https://github.com/twilio/voice-quickstart-ios/blob/master/Docs/access-tokens.md) - Using access tokens
 * [Managing Audio Interruptions](https://github.com/twilio/voice-quickstart-ios/blob/master/Docs/managing-audio-interruptions.md) - Managing audio interruptions
 * [Managing Push Credentials](https://github.com/twilio/voice-quickstart-ios/blob/master/Docs/managing-push-credentials.md) - Managing push credentials
@@ -15,6 +17,7 @@
 * [Issues and Support](#issues-and-support) - Filing issues and general support
 
 ## Voice iOS SDK Versions
+
 * [Migration Guide from 5.x to 6.x](https://github.com/twilio/voice-quickstart-ios/blob/master/Docs/migration-guide-5.x-6.x.md) - Migrating from 5.x to 6.x
 * [Migration Guide from 4.x to 5.x](https://github.com/twilio/twilio-voice-ios/blob/Releases/iOS-13-Migration-Guide.md) - Migrating from 4.x to 5.x
 * [4.0 New Features](https://github.com/twilio/voice-quickstart-ios/blob/master/Docs/new-features-4.0.md) - New features in 4.0
@@ -23,6 +26,7 @@
 * [Migration Guide from 2.x to 3.x](https://github.com/twilio/voice-quickstart-ios/blob/master/Docs/migration-guide-2.x-3.x.md) - Migrating from 2.x to 3.x
 
 ## Quickstart
+
 To get started with the quickstart application follow these steps. Steps 1-5 will enable the application to make a call. The remaining steps 6-9 will enable the application to receive incoming calls in the form of push notifications using Apple’s VoIP Service.
 
 1. [Install the TwilioVoice framework](#bullet1)
@@ -45,45 +49,39 @@ Twilio Voice is now distributed via Swift Package Manager. To consume Twilio Voi
 
 You must have the following installed:
 
-* [Node.js v10+](https://nodejs.org/en/download/)
-* NPM v6+ (comes installed with newer Node versions)
+* [Node.js v16+](https://nodejs.org/en/download/)
+* NPM v10+ (comes installed with newer Node versions)
 
 Run `npm install` to install all dependencies from NPM.
 
 Install [twilio-cli](https://www.twilio.com/docs/twilio-cli/quickstart) with:
 
-    $ npm install -g twilio-cli
-
+$ npm install -g twilio-cli
 Login to the Twilio CLI. You will be prompted for your Account SID and Auth Token, both of which you can find on the dashboard of your [Twilio console](https://twilio.com/console).
 
-    $ twilio login
-
+$ twilio login
 Once successfully logged in, an API Key, a secret get created and stored in your keychain as the `twilio-cli` password in `SKxxxx|secret` format. Please make a note of these values to use them in the `Server/.env` file.
 
 <kbd><img width="300px" src="https://github.com/twilio/voice-quickstart-ios/raw/master/Images/keychain-api-key-secret.png"/></kbd>
 
 This app requires the [Serverless plug-in](https://github.com/twilio-labs/plugin-serverless). Install the CLI plugin with:
 
-    $ twilio plugins:install @twilio-labs/plugin-serverless
-
+$ twilio plugins:install @twilio-labs/plugin-serverless
 Before deploying, create a `Server/.env` by copying from `Server/.env.example`
 
-    $ cp Server/.env.example Server/.env
-
+$ cp Server/.env.example Server/.env
 Update `Server/.env` with your Account SID, auth token, API Key and secret
 
-    ACCOUNT_SID=ACxxxx
-    AUTH_TOKEN=xxxxxx
-    API_KEY_SID=SKxxxx
-    API_SECRET=xxxxxx
-    APP_SID=APxxxx (available in step 3)
-    PUSH_CREDENTIAL_SID=CRxxxx (available in step 6)
-
+ACCOUNT_SID=ACxxxx
+AUTH_TOKEN=xxxxxx
+API_KEY_SID=SKxxxx
+API_SECRET=xxxxxx
+APP_SID=APxxxx (available in step 3)
+PUSH_CREDENTIAL_SID=CRxxxx (available in step 6)
 The `Server` folder contains a basic server component which can be used to vend access tokens or generate TwiML response for making call to a number or another client. The app is deployed to Twilio Serverless with the `serverless` plug-in:
 
-    $ cd Server
-    $ twilio serverless:deploy
-
+$ cd Server
+$ twilio serverless:deploy
 The server component that's baked into this quickstart is in Node.js. If you’d like to roll your own or better understand the Twilio Voice server side implementations, please see the list of starter projects in the following supported languages below:
 
 * [voice-quickstart-server-java](https://github.com/twilio/voice-quickstart-server-java)
@@ -99,28 +97,45 @@ Next, we need to create a TwiML application. A TwiML application identifies a pu
 
 Use Twilio CLI to create a TwiML app with the `make-call` endpoint you have just deployed (**Note: replace the value of `--voice-url` parameter with your `make-call` endpoint you just deployed to Twilio Serverless**)
 
-    $ twilio api:core:applications:create \
-        --friendly-name=my-twiml-app \
-        --voice-method=POST \
-        --voice-url="https://my-quickstart-dev.twil.io/make-call"
-
+$ twilio api:core:applications:create \
+    --friendly-name=my-twiml-app \
+    --voice-method=POST \
+    --voice-url="https://my-quickstart-dev.twil.io/make-call"
 You should receive an Appliciation SID that looks like this
 
-    APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ### <a name="bullet4"></a>4. Generate an access token for the quickstart
 
+#### Swift Quickstart ####
+For the Swift Quickstart, you no longer need to manually generate an access token. The updated version will automatically generate the token using the above server /access_token endpoint within XCode Swift code. The only requirement is to update the info.plist "AccessTokenServerURL"
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    :
+    :
+    </array>
+    <key>AccessTokenServerURL</key>
+    <string>https://my-quickstart-dev.twil.io/access-token?identity=alice</string>
+</dict>
+</plist>
+```
+NOTE: In the above config, we have chosen alice as the identity. You can replace it with any other identity you want to use. This will now fetch the access token from the serverless function you deployed in step 2. The access token will be fetched every time the application is started and last for 1 hour by default.
+
+#### ObjectiveC and AudioExample ####
+
+For the ObjectiveC and AudioExample versions, please still follow the below process:
+
 Install the `token` plug-in
 
-    $ twilio plugins:install @twilio-labs/plugin-token
-
+$ twilio plugins:install @twilio-labs/plugin-token
 Use the TwiML App SID you just created to generate an access token
 
-    $ twilio token:voice --identity=alice --voice-app-sid=APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
+$ twilio token:voice --identity=alice --voice-app-sid=APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Copy the access token string. Your iOS app will use this token to connect to Twilio.
-
-### <a name="bullet5"></a>5. Run the Swift Quickstart app
 
 Now let’s go back to the `VoiceQuickstart.xcworkspace`. Update the placeholder of `accessToken` with access token string you just copied
 
@@ -140,6 +155,9 @@ class ViewController: UIViewController {
     ...
 }
 ```
+Build and run the app.
+
+### <a name="bullet5"></a>5. Run the Swift Quickstart app
 
 Build and run the app. Leave the text field empty and press the call button to start a call. You will hear the congratulatory message. Support for dialing another client or number is described in steps 8 and 9. Tap "Hang Up" to disconnect.
 
@@ -153,37 +171,36 @@ Go to [Apple Developer portal](https://developer.apple.com/) and generate a VoIP
 
 Once you have generated the VoIP Services Certificate, you will need to provide the certificate and key to Twilio so that Twilio can send push notifications to your app on your behalf.
 
-Export your VoIP Service Certificate as a `.p12` file from *Keychain Access* and extract the certificate and private key from the `.p12` file using the `openssl` command. 
+Export your VoIP Service Certificate as a `.p12` file from *Keychain Access* and extract the certificate and private key from the `.p12` file using the `openssl` command.
 
-    $ openssl pkcs12 -in PATH_TO_YOUR_P12 -nokeys -out cert.pem -nodes
-    $ openssl x509 -in cert.pem -out cert.pem
-    $ openssl pkcs12 -in PATH_TO_YOUR_P12 -nocerts -out key.pem -nodes
-    $ openssl rsa -in key.pem -out key.pem
+$ openssl pkcs12 -in PATH_TO_YOUR_P12 -nokeys -out cert.pem -nodes -legacy
+$ openssl x509 -in cert.pem -out cert.pem
+$ openssl pkcs12 -in PATH_TO_YOUR_P12 -nocerts -out key.pem -nodes -legacy
+$ openssl rsa -in key.pem -out key.pem
+
+NOTE: using the -legacy flag is necessary to ensure that the certificate and key are in the correct format for Twilio.
 
 Use Twilio CLI to create a Push Credential using the cert and key.
 
-    $ twilio api:chat:v2:credentials:create \
-        --type=apn \
-        --sandbox \
-        --friendly-name="voice-push-credential (sandbox)" \
-        --certificate="$(cat PATH_TO_CERT_PEM)" \
-        --private-key="$(cat PATH_TO_KEY_PEM)"
-
+$ twilio api:chat:v2:credentials:create \
+    --type=apn \
+    --sandbox \
+    --friendly-name="voice-push-credential (sandbox)" \
+    --certificate="$(cat PATH_TO_CERT_PEM)" \
+    --private-key="$(cat PATH_TO_KEY_PEM)"
 This will return a Push Credential SID that looks like this
 
-    CRxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    
+CRxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 The `--sandbox` option tells Twilio to send the notification requests to the sandbox endpoint of Apple's APNS service. Once the app is ready for distribution or store submission, create a separate Push Credential with a new VoIP Service certificate **without** the `--sandbox` option.
 
 **Note: we strongly recommend using different Twilio accounts (or subaccounts) to separate VoIP push notification requests for development and production apps.**
 
 Now let's generate another access token and add the Push Credential to the Voice Grant.
 
-    $ twilio token:voice \
-        --identity=alice \
-        --voice-app-sid=APxxxx \
-        --push-credential-sid=CRxxxxs
-
+$ twilio token:voice \
+    --identity=alice \
+    --voice-app-sid=APxxxx \
+    --push-credential-sid=CRxxxxs
 ### <a name="bullet7"></a>7. Receive an incoming call
 
 You are now ready to receive incoming calls. Update your app with the access token generated from step 6 and rebuild your app. The `TwilioVoiceSDK.register()` method will register your mobile client with the PushKit device token as well as the access token. Once registered, hit your application server's **/place-call** endpoint: `https://my-quickstart-dev.twil.io/place-call?to=alice`. This will trigger a Twilio REST API request that will make an inbound call to the identity registered on your mobile app. Once your app accepts the call, you should hear a congratulatory message.
@@ -195,18 +212,17 @@ Register your mobile client with the PushKit device token:
         if let error = error {
             NSLog("An error occurred while registering: \(error.localizedDescription)")
         } else {
-            NSLog("Successfully registered for VoIP push notifications.")                
+            NSLog("Successfully registered for VoIP push notifications.")              
         }
     }
 ```
-
 Please note that your application must have `voip` enabled in the `UIBackgroundModes` of your app's plist in order to be able to receive push notifications.
 
 <kbd><img width="300px" src="https://github.com/twilio/voice-quickstart-ios/raw/master/Images/incoming-call.png"/></kbd>
 
 ### <a name="bullet8"></a>8. Make client to client call
 
-To make client to client calls, you need the application running on two devices. To run the application on an additional device, make sure you use a different identity in your access token when registering the new device. 
+To make client to client calls, you need the application running on two devices. To run the application on an additional device, make sure you use a different identity in your access token when registering the new device.
 
 Use the text field to specify the identity of the call receiver, then tap the "Call" button to make a call. The TwiML parameters used in `TwilioVoice.connect()` method should match the name used in the server.
 

@@ -111,16 +111,21 @@ class ViewController: UIViewController {
     func checkForStoredEmail() {
         print("Checking for stored email...")
         do {
-            print("Attempting to access keychain...")
-            if let storedEmail = try keychain.get("identity") {
-                print("Stored email found: \(storedEmail)")
-                fetchAccessTokenAndSetupCall()
-            } else {
-                print("No stored email found in keychain. Preparing to show email input popover...")
-                DispatchQueue.main.async {
-                    self.performSegue(withIdentifier: "showEmailPopover", sender: nil)
-                }
+            // TEMP: ALWAYS ask for e-mail
+            DispatchQueue.main.async {
+                self.performSegue(withIdentifier: "showEmailPopover", sender: nil)
             }
+            
+//            print("Attempting to access keychain...")
+//            if let storedEmail = try keychain.get("identity") {
+//                print("Stored email found: \(storedEmail)")
+//                fetchAccessTokenAndSetupCall()
+//            } else {
+//                print("No stored email found in keychain. Preparing to show email input popover...")
+//                DispatchQueue.main.async {
+//                    self.performSegue(withIdentifier: "showEmailPopover", sender: nil)
+//                }
+//            }
         } catch {
             print("Error accessing keychain: \(error)")
             print("Error details: \(error.localizedDescription)")
@@ -131,6 +136,7 @@ class ViewController: UIViewController {
         }
         print("Finished checking for stored email.")
     }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showEmailPopover",
            let emailInputVC = segue.destination as? EmailInputViewController {

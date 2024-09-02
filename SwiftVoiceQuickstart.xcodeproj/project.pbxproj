@@ -13,6 +13,8 @@
 		24BA343E1D874AC800B0B4F7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24BA343D1D874AC800B0B4F7 /* Assets.xcassets */; };
 		24BA34411D874AC800B0B4F7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 24BA343F1D874AC800B0B4F7 /* LaunchScreen.storyboard */; };
 		24BA34491D874BBD00B0B4F7 /* TwilioLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 24BA34481D874BBD00B0B4F7 /* TwilioLogo.png */; };
+		2A1E25D62C85AFC2005103C2 /* EmailInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E25D52C85AFC2005103C2 /* EmailInputViewController.swift */; };
+		2A1E25D92C85B1E8005103C2 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 2A1E25D82C85B1E8005103C2 /* KeychainAccess */; };
 		8F56E8D625C8B25E00B5AB19 /* TwilioVoice in Frameworks */ = {isa = PBXBuildFile; productRef = 8F56E8D525C8B25E00B5AB19 /* TwilioVoice */; };
 		8F6BABF92399B2F00030BE4F /* ringtone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8F6BABF82399B2F00030BE4F /* ringtone.wav */; };
 /* End PBXBuildFile section */
@@ -26,6 +28,7 @@
 		24BA34401D874AC800B0B4F7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		24BA34421D874AC800B0B4F7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		24BA34481D874BBD00B0B4F7 /* TwilioLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TwilioLogo.png; sourceTree = "<group>"; };
+		2A1E25D52C85AFC2005103C2 /* EmailInputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailInputViewController.swift; sourceTree = "<group>"; };
 		8F6BABF82399B2F00030BE4F /* ringtone.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ringtone.wav; sourceTree = "<group>"; };
 		8FAD20B72332DC3900E5B42F /* SwiftVoiceQuickstart.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftVoiceQuickstart.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -35,6 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A1E25D92C85B1E8005103C2 /* KeychainAccess in Frameworks */,
 				8F56E8D625C8B25E00B5AB19 /* TwilioVoice in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -66,6 +70,7 @@
 			children = (
 				8FAD20B72332DC3900E5B42F /* SwiftVoiceQuickstart.entitlements */,
 				24BA34361D874AC800B0B4F7 /* AppDelegate.swift */,
+				2A1E25D52C85AFC2005103C2 /* EmailInputViewController.swift */,
 				24BA34381D874AC800B0B4F7 /* ViewController.swift */,
 				24BA343A1D874AC800B0B4F7 /* Main.storyboard */,
 				24BA343D1D874AC800B0B4F7 /* Assets.xcassets */,
@@ -116,6 +121,7 @@
 			name = SwiftVoiceQuickstart;
 			packageProductDependencies = (
 				8F56E8D525C8B25E00B5AB19 /* TwilioVoice */,
+				2A1E25D82C85B1E8005103C2 /* KeychainAccess */,
 			);
 			productName = SwiftVoiceQuickstart;
 			productReference = 24BA34331D874AC800B0B4F7 /* SwiftVoiceQuickstart.app */;
@@ -157,6 +163,7 @@
 			mainGroup = 24BA342A1D874AC800B0B4F7;
 			packageReferences = (
 				8F56E8D425C8B25E00B5AB19 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */,
+				2A1E25D72C85B1E8005103C2 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 			);
 			productRefGroup = 24BA34341D874AC800B0B4F7 /* Products */;
 			projectDirPath = "";
@@ -189,6 +196,7 @@
 			files = (
 				24BA34391D874AC800B0B4F7 /* ViewController.swift in Sources */,
 				24BA34371D874AC800B0B4F7 /* AppDelegate.swift in Sources */,
+				2A1E25D62C85AFC2005103C2 /* EmailInputViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,6 +404,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2A1E25D72C85B1E8005103C2 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		8F56E8D425C8B25E00B5AB19 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/twilio/twilio-voice-ios";
@@ -407,6 +423,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2A1E25D82C85B1E8005103C2 /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A1E25D72C85B1E8005103C2 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
 		8F56E8D525C8B25E00B5AB19 /* TwilioVoice */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8F56E8D425C8B25E00B5AB19 /* XCRemoteSwiftPackageReference "twilio-voice-ios" */;
