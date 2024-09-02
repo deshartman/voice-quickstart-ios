@@ -49,6 +49,6 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>AccessTokenServerURL</key>
-	<string>https://des.ngrok.dev/access-token?identity=des</string>
+	<string>https://des.ngrok.dev/access-token</string>
 </dict>
 </plist>
