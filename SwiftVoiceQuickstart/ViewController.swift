@@ -183,8 +183,9 @@ class ViewController: UIViewController {
     
     func fetchAccessToken(identity: String, completion: @escaping (Bool) -> Void) {
         guard let accessTokenServerURL = Bundle.main.object(forInfoDictionaryKey: "AccessTokenServerURL") as? String,
-              var urlComponents = URLComponents(string: accessTokenServerURL) else {
-            print("Invalid access token server URL")
+              var urlComponents = URLComponents(string: accessTokenServerURL),
+              let identity = try? keychain.get("identity") else {
+            print("Invalid access token server URL or missing identity")
             completion(false)
             return
         }
@@ -386,6 +387,7 @@ extension ViewController: PushKitEventDelegate {
     func credentialsUpdated(credentials: PKPushCredentials) {
         guard
             let accessToken = self.accessToken,
+            let identity = try? keychain.get("identity"),
             (registrationRequired() || UserDefaults.standard.data(forKey: kCachedDeviceToken) != credentials.token)
         else {
             return
