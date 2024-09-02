@@ -11,7 +11,6 @@ import PushKit
 import CallKit
 import TwilioVoice
 
-let accessToken = <#PASTE YOUR ACCESS TOKEN HERE#>
 let twimlParamTo = "to"
 
 let kRegistrationTTLInDays = 365
@@ -20,6 +19,8 @@ let kCachedDeviceToken = "CachedDeviceToken"
 let kCachedBindingDate = "CachedBindingDate"
 
 class ViewController: UIViewController {
+    
+    private var accessToken: String?
 
     @IBOutlet weak var qualityWarningsToaster: UILabel!
     @IBOutlet weak var placeCallButton: UIButton!
@@ -33,6 +34,8 @@ class ViewController: UIViewController {
 
     var isSpinning: Bool
     var incomingAlertController: UIAlertController?
+    
+
 
     var callKitCompletionCallback: ((Bool) -> Void)? = nil
     var audioDevice = DefaultAudioDevice()
@@ -71,8 +74,24 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        toggleUIState(isEnabled: true, showCallControl: false)
+        toggleUIState(isEnabled: false, showCallControl: false)
         outgoingValue.delegate = self
+        
+       fetchAccessToken { [weak self] success in
+           guard let self = self else { return }
+           DispatchQueue.main.async {
+               if success {
+                   self.toggleUIState(isEnabled: true, showCallControl: false)
+                   print("Access token fetched successfully")
+               } else {
+                   let alertController = UIAlertController(title: "Error",
+                                                           message: "Failed to fetch access token. The app may not function correctly.",
+                                                           preferredStyle: .alert)
+                   alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                   self.present(alertController, animated: true, completion: nil)
+               }
+           }
+       }
         
         /* Please note that the designated initializer `CXProviderConfiguration(localizedName: String)` has been deprecated on iOS 14. */
         let configuration = CXProviderConfiguration(localizedName: "Voice Quickstart")
@@ -95,6 +114,32 @@ class ViewController: UIViewController {
         if let params = LogParameters.init(module:TwilioVoiceSDK.LogModule.platform , logLevel: TwilioVoiceSDK.LogLevel.debug, message: "The default logger is used for app logs") {
             defaultLogger.log(params: params)
         }
+    }
+    
+    func fetchAccessToken(completion: @escaping (Bool) -> Void) {
+        guard let accessTokenServerURL = Bundle.main.object(forInfoDictionaryKey: "AccessTokenServerURL") as? String,
+              let url = URL(string: accessTokenServerURL) else {
+            print("Invalid access token server URL")
+            completion(false)
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self, let data = data, error == nil else {
+                print("Error fetching access token: \(error?.localizedDescription ?? "Unknown error")")
+                completion(false)
+                return
+            }
+            
+            if let accessToken = String(data: data, encoding: .utf8) {
+                self.accessToken = accessToken
+                print("Access Token successfully fetched")
+                completion(true)
+            } else {
+                print("Invalid access token data received")
+                completion(false)
+            }
+        }.resume()
     }
 
     func toggleUIState(isEnabled: Bool, showCallControl: Bool) {
@@ -266,6 +311,7 @@ extension ViewController: UITextFieldDelegate {
 extension ViewController: PushKitEventDelegate {
     func credentialsUpdated(credentials: PKPushCredentials) {
         guard
+            let accessToken = self.accessToken,
             (registrationRequired() || UserDefaults.standard.data(forKey: kCachedDeviceToken) != credentials.token)
         else {
             return
@@ -317,7 +363,8 @@ extension ViewController: PushKitEventDelegate {
     }
     
     func credentialsInvalidated() {
-        guard let deviceToken = UserDefaults.standard.data(forKey: kCachedDeviceToken) else { return }
+        guard let deviceToken = UserDefaults.standard.data(forKey: kCachedDeviceToken),
+        let accessToken = self.accessToken else { return }
         
         TwilioVoiceSDK.unregister(accessToken: accessToken, deviceToken: deviceToken) { error in
             if let error = error {
@@ -789,7 +836,13 @@ extension ViewController: CXProviderDelegate {
     }
     
     func performVoiceCall(uuid: UUID, client: String?, completionHandler: @escaping (Bool) -> Void) {
-        let connectOptions = ConnectOptions(accessToken: accessToken) { builder in
+       guard let accessToken = self.accessToken else {
+           print("Access token not available")
+           completionHandler(false)
+           return
+       }
+
+       let connectOptions = ConnectOptions(accessToken: accessToken) { builder in
             builder.params = [twimlParamTo: self.outgoingValue.text ?? ""]
             builder.uuid = uuid
         }
