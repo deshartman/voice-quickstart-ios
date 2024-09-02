@@ -24,7 +24,7 @@ class ViewController: UIViewController {
     
     private var accessToken: String?
     let keychain = Keychain(service: "com.twilio.SwiftVoiceQuickstart")
-
+    
     @IBOutlet weak var qualityWarningsToaster: UILabel!
     @IBOutlet weak var placeCallButton: UIButton!
     @IBOutlet weak var iconView: UIImageView!
@@ -32,14 +32,14 @@ class ViewController: UIViewController {
     @IBOutlet weak var callControlView: UIView!
     @IBOutlet weak var muteSwitch: UISwitch!
     @IBOutlet weak var speakerSwitch: UISwitch!
-
+    
     var incomingPushCompletionCallback: (() -> Void)?
-
+    
     var isSpinning: Bool
     var incomingAlertController: UIAlertController?
     
-
-
+    
+    
     var callKitCompletionCallback: ((Bool) -> Void)? = nil
     var audioDevice = DefaultAudioDevice()
     var activeCallInvites: [String: CallInvite]! = [:]
@@ -47,7 +47,7 @@ class ViewController: UIViewController {
     
     // activeCall represents the last connected call
     var activeCall: Call? = nil
-
+    
     var callKitProvider: CXProvider?
     let callKitCallController = CXCallController()
     var userInitiatedDisconnect: Bool = false
@@ -57,13 +57,13 @@ class ViewController: UIViewController {
      When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge) is enabled in
      the <Dial> TwiML verb, the caller will not hear the ringback while the call is ringing and awaiting
      to be accepted on the callee's side. Configure this flag based on the TwiML application.
-    */
+     */
     var playCustomRingback = false
     var ringtonePlayer: AVAudioPlayer? = nil
-
+    
     required init?(coder aDecoder: NSCoder) {
         isSpinning = false
-
+        
         super.init(coder: aDecoder)
     }
     
@@ -73,10 +73,10 @@ class ViewController: UIViewController {
             provider.invalidate()
         }
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         toggleUIState(isEnabled: false, showCallControl: false)
         outgoingValue.delegate = self
         
@@ -116,16 +116,16 @@ class ViewController: UIViewController {
                 self.performSegue(withIdentifier: "showEmailPopover", sender: nil)
             }
             
-//            print("Attempting to access keychain...")
-//            if let storedEmail = try keychain.get("identity") {
-//                print("Stored email found: \(storedEmail)")
-//                fetchAccessTokenAndSetupCall()
-//            } else {
-//                print("No stored email found in keychain. Preparing to show email input popover...")
-//                DispatchQueue.main.async {
-//                    self.performSegue(withIdentifier: "showEmailPopover", sender: nil)
-//                }
-//            }
+            //            print("Attempting to access keychain...")
+            //            if let storedEmail = try keychain.get("identity") {
+            //                print("Stored email found: \(storedEmail)")
+            //                fetchAccessTokenAndSetupCall()
+            //            } else {
+            //                print("No stored email found in keychain. Preparing to show email input popover...")
+            //                DispatchQueue.main.async {
+            //                    self.performSegue(withIdentifier: "showEmailPopover", sender: nil)
+            //                }
+            //            }
         } catch {
             print("Error accessing keychain: \(error)")
             print("Error details: \(error.localizedDescription)")
@@ -171,9 +171,7 @@ class ViewController: UIViewController {
                     self.toggleUIState(isEnabled: true, showCallControl: false)
                     print("Access token fetched successfully")
                 } else {
-                    let alertController = UIAlertController(title: "Error",
-                                                            message: "Failed to fetch access token. The app may not function correctly.",
-                                                            preferredStyle: .alert)
+                    let alertController = UIAlertController(title: "Error", message: "Failed to fetch access token. The app may not function correctly.", preferredStyle: .alert)
                     alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                     self.present(alertController, animated: true, completion: nil)
                 }
@@ -216,7 +214,7 @@ class ViewController: UIViewController {
             }
         }.resume()
     }
-
+    
     func toggleUIState(isEnabled: Bool, showCallControl: Bool) {
         placeCallButton.isEnabled = isEnabled
         
@@ -230,7 +228,7 @@ class ViewController: UIViewController {
             callControlView.isHidden = true
         }
     }
-
+    
     func showMicrophoneAccessRequest(_ uuid: UUID, _ handle: String) {
         let alertController = UIAlertController(title: "Voice Quick Start",
                                                 message: "Microphone permission not granted",
@@ -255,7 +253,7 @@ class ViewController: UIViewController {
         
         present(alertController, animated: true, completion: nil)
     }
-
+    
     func getActiveCall() -> Call? {
         if let activeCall = activeCall {
             return activeCall
@@ -266,7 +264,7 @@ class ViewController: UIViewController {
             return nil
         }
     }
-
+    
     @IBAction func mainButtonPressed(_ sender: Any) {
         if !activeCalls.isEmpty {
             guard let activeCall = getActiveCall() else { return }
@@ -283,7 +281,7 @@ class ViewController: UIViewController {
                 self?.performStartCallAction(uuid: uuid, handle: handle)
                 return
             }
-        
+            
             self?.showMicrophoneAccessRequest(uuid, handle)
         }
     }
@@ -309,7 +307,7 @@ class ViewController: UIViewController {
     
     @IBAction func muteSwitchToggled(_ sender: UISwitch) {
         guard let activeCall = getActiveCall() else { return }
-
+        
         activeCall.isMuted = sender.isOn
     }
     
@@ -358,7 +356,7 @@ class ViewController: UIViewController {
             }
         }) { [weak self] finished in
             guard let strongSelf = self else { return }
-
+            
             if finished {
                 if strongSelf.isSpinning {
                     strongSelf.spin(options: UIView.AnimationOptions.curveLinear)
@@ -369,8 +367,8 @@ class ViewController: UIViewController {
         }
     }
 }
-    
-    
+
+
 // MARK: - UITextFieldDelegate
 
 extension ViewController: UITextFieldDelegate {
@@ -379,8 +377,8 @@ extension ViewController: UITextFieldDelegate {
         return true
     }
 }
-    
-    
+
+
 // MARK: - PushKitEventDelegate
 
 extension ViewController: PushKitEventDelegate {
@@ -392,7 +390,7 @@ extension ViewController: PushKitEventDelegate {
         else {
             return
         }
-
+        
         let cachedDeviceToken = credentials.token
         /*
          * Perform registration if a new device token is detected.
@@ -431,7 +429,7 @@ extension ViewController: PushKitEventDelegate {
         var components = DateComponents()
         components.setValue(kRegistrationTTLInDays/2, for: .day)
         let expirationDate = Calendar.current.date(byAdding: components, to: lastBindingCreated as! Date)!
-
+        
         if expirationDate.compare(date) == ComparisonResult.orderedDescending {
             return false
         }
@@ -440,7 +438,7 @@ extension ViewController: PushKitEventDelegate {
     
     func credentialsInvalidated() {
         guard let deviceToken = UserDefaults.standard.data(forKey: kCachedDeviceToken),
-        let accessToken = self.accessToken else { return }
+              let accessToken = self.accessToken else { return }
         
         TwilioVoiceSDK.unregister(accessToken: accessToken, deviceToken: deviceToken) { error in
             if let error = error {
@@ -480,7 +478,7 @@ extension ViewController: PushKitEventDelegate {
             completion()
         }
     }
-
+    
     func incomingPushHandled() {
         guard let completion = incomingPushCompletionCallback else { return }
         
@@ -516,7 +514,7 @@ extension ViewController: NotificationDelegate {
         }
         
         let from = (callInvite.from ?? "Voice Bot").replacingOccurrences(of: "client:", with: "")
-
+        
         // Always report to CallKit
         reportIncomingCall(from: from, uuid: callInvite.uuid)
         activeCallInvites[callInvite.uuid.uuidString] = callInvite
@@ -524,7 +522,7 @@ extension ViewController: NotificationDelegate {
     
     func cancelledCallInviteReceived(cancelledCallInvite: CancelledCallInvite, error: Error) {
         NSLog("cancelledCallInviteCanceled:error:, error: \(error.localizedDescription)")
-
+        
         guard let activeCallInvites = activeCallInvites, !activeCallInvites.isEmpty else {
             NSLog("No pending call invite")
             return
@@ -553,7 +551,7 @@ extension ViewController: CallDelegate {
          <Dial> TwiML verb, the caller will not hear the ringback while the call is ringing and awaiting to be
          accepted on the callee's side. The application can use the `AVAudioPlayer` to play custom audio files
          between the `[TVOCallDelegate callDidStartRinging:]` and the `[TVOCallDelegate callDidConnect:]` callbacks.
-        */
+         */
         if playCustomRingback {
             playRingback()
         }
@@ -571,12 +569,12 @@ extension ViewController: CallDelegate {
         }
         
         placeCallButton.setTitle("Hang Up", for: .normal)
-
+        
         stopSpin()
         toggleAudioRoute(toSpeaker: true)
         toggleUIState(isEnabled: true, showCallControl: true)
     }
-
+    
     func callIsReconnecting(call: Call, error: Error) {
         NSLog("call:isReconnectingWithError:")
         
@@ -603,7 +601,7 @@ extension ViewController: CallDelegate {
         if let provider = callKitProvider {
             provider.reportCall(with: call.uuid!, endedAt: Date(), reason: CXCallEndedReason.failed)
         }
-
+        
         callDisconnected(call: call)
     }
     
@@ -625,7 +623,7 @@ extension ViewController: CallDelegate {
                 provider.reportCall(with: call.uuid!, endedAt: Date(), reason: reason)
             }
         }
-
+        
         callDisconnected(call: call)
     }
     
@@ -654,17 +652,17 @@ extension ViewController: CallDelegate {
     
     func callDidReceiveQualityWarnings(call: Call, currentWarnings: Set<NSNumber>, previousWarnings: Set<NSNumber>) {
         /**
-        * currentWarnings: existing quality warnings that have not been cleared yet
-        * previousWarnings: last set of warnings prior to receiving this callback
-        *
-        * Example:
-        *   - currentWarnings: { A, B }
-        *   - previousWarnings: { B, C }
-        *   - intersection: { B }
-        *
-        * Newly raised warnings = currentWarnings - intersection = { A }
-        * Newly cleared warnings = previousWarnings - intersection = { C }
-        */
+         * currentWarnings: existing quality warnings that have not been cleared yet
+         * previousWarnings: last set of warnings prior to receiving this callback
+         *
+         * Example:
+         *   - currentWarnings: { A, B }
+         *   - previousWarnings: { B, C }
+         *   - intersection: { B }
+         *
+         * Newly raised warnings = currentWarnings - intersection = { A }
+         * Newly cleared warnings = previousWarnings - intersection = { C }
+         */
         var warningsIntersection: Set<NSNumber> = currentWarnings
         warningsIntersection = warningsIntersection.intersection(previousWarnings)
         
@@ -744,7 +742,7 @@ extension ViewController: CallDelegate {
     }
 }
 
- 
+
 // MARK: - CXProviderDelegate
 
 extension ViewController: CXProviderDelegate {
@@ -752,25 +750,25 @@ extension ViewController: CXProviderDelegate {
         NSLog("providerDidReset:")
         audioDevice.isEnabled = false
     }
-
+    
     func providerDidBegin(_ provider: CXProvider) {
         NSLog("providerDidBegin")
     }
-
+    
     func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
         NSLog("provider:didActivateAudioSession:")
         audioDevice.isEnabled = true
     }
-
+    
     func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
         NSLog("provider:didDeactivateAudioSession:")
         audioDevice.isEnabled = false
     }
-
+    
     func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
         NSLog("provider:timedOutPerformingAction:")
     }
-
+    
     func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
         NSLog("provider:performStartCallAction:")
         
@@ -790,7 +788,7 @@ extension ViewController: CXProviderDelegate {
         
         action.fulfill()
     }
-
+    
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         NSLog("provider:performAnswerCallAction:")
         
@@ -804,7 +802,7 @@ extension ViewController: CXProviderDelegate {
         
         action.fulfill()
     }
-
+    
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         NSLog("provider:performEndCallAction:")
         
@@ -816,7 +814,7 @@ extension ViewController: CXProviderDelegate {
         } else {
             NSLog("Unknown UUID to perform end-call action with")
         }
-
+        
         action.fulfill()
     }
     
@@ -825,18 +823,18 @@ extension ViewController: CXProviderDelegate {
         
         if let call = activeCalls[action.callUUID.uuidString] {
             call.isOnHold = action.isOnHold
-
+            
             /** Explicitly enable the TVOAudioDevice.
-            * This is workaround for an iOS issue where the `provider(_:didActivate:)` method is not called
-            * when un-holding a VoIP call after an ended PSTN call.
-            */ https://developer.apple.com/forums/thread/694836
+             * This is workaround for an iOS issue where the `provider(_:didActivate:)` method is not called
+             * when un-holding a VoIP call after an ended PSTN call.
+             */ https://developer.apple.com/forums/thread/694836
             if !call.isOnHold {
                 audioDevice.isEnabled = true
                 activeCall = call
             }
-
+            
             toggleUIState(isEnabled: true, showCallControl: true)
-
+            
             action.fulfill()
         } else {
             action.fail()
@@ -845,7 +843,7 @@ extension ViewController: CXProviderDelegate {
     
     func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
         NSLog("provider:performSetMutedAction:")
-
+        
         if let call = activeCalls[action.callUUID.uuidString] {
             call.isMuted = action.isMuted
             action.fulfill()
@@ -853,7 +851,7 @@ extension ViewController: CXProviderDelegate {
             action.fail()
         }
     }
-
+    
     
     // MARK: Call Kit Actions
     func performStartCallAction(uuid: UUID, handle: String) {
@@ -865,15 +863,15 @@ extension ViewController: CXProviderDelegate {
         let callHandle = CXHandle(type: .generic, value: handle)
         let startCallAction = CXStartCallAction(call: uuid, handle: callHandle)
         let transaction = CXTransaction(action: startCallAction)
-
+        
         callKitCallController.request(transaction) { error in
             if let error = error {
                 NSLog("StartCallAction transaction request failed: \(error.localizedDescription)")
                 return
             }
-
+            
             NSLog("StartCallAction transaction request successful")
-
+            
             let callUpdate = CXCallUpdate()
             
             callUpdate.remoteHandle = callHandle
@@ -882,17 +880,17 @@ extension ViewController: CXProviderDelegate {
             callUpdate.supportsGrouping = false
             callUpdate.supportsUngrouping = false
             callUpdate.hasVideo = false
-
+            
             provider.reportCall(with: uuid, updated: callUpdate)
         }
     }
-
+    
     func reportIncomingCall(from: String, uuid: UUID) {
         guard let provider = callKitProvider else {
             NSLog("CallKit provider not available")
             return
         }
-
+        
         let callHandle = CXHandle(type: .generic, value: from)
         let callUpdate = CXCallUpdate()
         
@@ -902,7 +900,7 @@ extension ViewController: CXProviderDelegate {
         callUpdate.supportsGrouping = false
         callUpdate.supportsUngrouping = false
         callUpdate.hasVideo = false
-
+        
         provider.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if let error = error {
                 NSLog("Failed to report incoming call successfully: \(error.localizedDescription).")
@@ -911,12 +909,12 @@ extension ViewController: CXProviderDelegate {
             }
         }
     }
-
+    
     func performEndCallAction(uuid: UUID) {
-
+        
         let endCallAction = CXEndCallAction(call: uuid)
         let transaction = CXTransaction(action: endCallAction)
-
+        
         callKitCallController.request(transaction) { error in
             if let error = error {
                 NSLog("EndCallAction transaction request failed: \(error.localizedDescription).")
@@ -927,13 +925,13 @@ extension ViewController: CXProviderDelegate {
     }
     
     func performVoiceCall(uuid: UUID, client: String?, completionHandler: @escaping (Bool) -> Void) {
-       guard let accessToken = self.accessToken else {
-           print("Access token not available")
-           completionHandler(false)
-           return
-       }
-
-       let connectOptions = ConnectOptions(accessToken: accessToken) { builder in
+        guard let accessToken = self.accessToken else {
+            print("Access token not available")
+            completionHandler(false)
+            return
+        }
+        
+        let connectOptions = ConnectOptions(accessToken: accessToken) { builder in
             builder.params = [twimlParamTo: self.outgoingValue.text ?? ""]
             builder.uuid = uuid
         }
