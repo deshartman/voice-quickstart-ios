@@ -36,15 +36,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PKPushRegistryDelegate {
          * PushKit push notifications, and if your app decides not to report the received outdated push notifications to CallKit, iOS may
          * terminate your app.
          */
-        initializePushKit()
-
+       // We'll initialize PushKit later, after email verification and access token fetch
         return true
     }
     
-    func initializePushKit() {
-        voipRegistry.delegate = self
-        voipRegistry.desiredPushTypes = Set([PKPushType.voIP])
-    }
+   func initializePushKit() {
+       DispatchQueue.main.async { [weak self] in
+           guard let self = self else { return }
+           print("Initializing PushKit")
+           // Invalidate existing credentials before registering new ones
+           self.pushKitEventDelegate?.credentialsInvalidated()
+           self.voipRegistry.delegate = self
+           self.voipRegistry.desiredPushTypes = Set([PKPushType.voIP])
+       }
+   }
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
