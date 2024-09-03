@@ -44,8 +44,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PKPushRegistryDelegate {
        DispatchQueue.main.async { [weak self] in
            guard let self = self else { return }
            print("Initializing PushKit")
-           // Invalidate existing credentials before registering new ones
-           self.pushKitEventDelegate?.credentialsInvalidated()
            self.voipRegistry.delegate = self
            self.voipRegistry.desiredPushTypes = Set([PKPushType.voIP])
        }

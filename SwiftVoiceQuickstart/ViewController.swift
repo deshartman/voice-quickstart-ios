@@ -115,7 +115,11 @@ class ViewController: UIViewController {
        print("Attempting to access keychain...")
        if let storedEmail = try keychain.get("identity") {
            print("Stored email found: \(storedEmail)")
-           registerForPushNotifications(with: storedEmail)
+           registerForPushNotifications(with: storedEmail) { success in
+               if success {
+                   print("Successfully registered for push notifications with stored email")
+               }
+           }
        } else {
            print("No stored email found in keychain. Preparing to show email input popover...")
            DispatchQueue.main.async {
@@ -133,53 +137,114 @@ class ViewController: UIViewController {
         print("Finished checking for stored email.")
     }
     
+    @IBAction func changeEmailButtonTapped(_ sender: UIButton) {
+        // This method will be called when the "Change Email" button is tapped
+        // The segue to the EmailInputViewController is already set up in the storyboard
+    }
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showEmailPopover",
            let emailInputVC = segue.destination as? EmailInputViewController {
             emailInputVC.completion = { [weak self] email in
-                self?.saveEmail(email)
-                self?.dismiss(animated: true) {
-                    self?.registerForPushNotifications(with: email)
+                guard let self = self else { return }
+
+                // Unregister existing push notifications if changing email
+                if self.accessToken != nil {
+                    self.credentialsInvalidated()
+                }
+
+                self.saveEmail(email)
+                self.dismiss(animated: true) {
+                    self.registerForPushNotifications(with: email) { success in
+                        if success {
+                            print("Successfully registered for push notifications with new email: \(email)")
+                        } else {
+                            print("Failed to register for push notifications with new email: \(email)")
+                        }
+                        self.verifyEmailChange(email)
+                    }
                 }
             }
         }
     }
     
+    func verifyEmailChange(_ newEmail: String) {
+        do {
+            if let storedEmail = try keychain.get("identity") {
+                if storedEmail == newEmail {
+                    print("Email successfully updated to: \(newEmail)")
+                    // You can show an alert to the user here if you want
+                } else {
+                    print("Error: Email not updated. Current email: \(storedEmail)")
+                    // Handle the error, maybe show an alert to the user
+                }
+            }
+        } catch {
+            print("Error verifying email change: \(error)")
+        }
+    }
+
+    
     func saveEmail(_ email: String) {
         do {
             try keychain.set(email, key: "identity")
             print("Email saved: \(email)")
-           // Invalidate existing credentials when a new email is saved
-           credentialsInvalidated()
         } catch {
             print("Error saving email to keychain: \(error)")
         }
     }
     
-   func registerForPushNotifications(with identity: String) {
-
-       print("Registering for push notifications with identity: \(identity)")
-       fetchAccessToken(identity: identity) { [weak self] success in
-           guard let self = self else { return }
+    func registerForPushNotifications(with identity: String, completion: @escaping (Bool) -> Void) {
+        print("Registering for push notifications with identity: \(identity)")
+        fetchAccessToken(identity: identity) { [weak self] success in
+            guard let self = self else { return }
             DispatchQueue.main.async {
                 if success {
                     print("Access token fetched successfully for identity: \(identity)")
                     self.toggleUIState(isEnabled: true, showCallControl: false)
- 
+
                     // Now that we have the access token, we can initialize PushKit
                     if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
                         print("Initializing PushKit for identity: \(identity)")
                         appDelegate.initializePushKit()
+                        
+                        // Check if we have both accessToken and deviceToken
+                        guard let accessToken = self.accessToken else {
+                            print("Access token is nil. Cannot register for VoIP push notifications.")
+                            completion(false)
+                            return
+                        }
+                        
+                        guard let deviceToken = appDelegate.voipRegistry.pushToken(for: .voIP) else {
+                            print("Device token is nil. Cannot register for VoIP push notifications.")
+                            completion(false)
+                            return
+                        }
+                        
+                        // Register for VoIP push notifications
+                        TwilioVoiceSDK.register(accessToken: accessToken, deviceToken: deviceToken) { error in
+                            if let error = error {
+                                print("Failed to register for VoIP push notifications: \(error.localizedDescription)")
+                                completion(false)
+                            } else {
+                                print("Successfully registered for VoIP push notifications with identity: \(identity)")
+                                completion(true)
+                            }
+                        }
+                    } else {
+                        print("Failed to initialize PushKit: AppDelegate not available")
+                        completion(false)
                     }
                 } else {
                     print("Failed to fetch access token for identity: \(identity)")
                     let alertController = UIAlertController(title: "Error", message: "Failed to fetch access token. The app may not function correctly.", preferredStyle: .alert)
                     alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                     self.present(alertController, animated: true, completion: nil)
+                    completion(false)
                 }
             }
-       }
-   }
+        }
+    }
     
     func fetchAccessToken(identity: String, completion: @escaping (Bool) -> Void) {
         guard let accessTokenServerURL = Bundle.main.object(forInfoDictionaryKey: "AccessTokenServerURL") as? String,
