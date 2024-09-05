@@ -269,3 +269,43 @@ For general inquiries related to the Voice SDK you can [file a support ticket](h
 ## License
 
 MIT
+
+# Distribution #
+The next section will describe how to distribute the application via Testflight. This allows you to bundle up the package and distribute it to your testers. We will use external testers for this example.
+
+1. set the version <DIAGRAM> and do a build clean
+2. Archive the application once done you will see the application in the Organizer <INSERT DIAGRAM HERE>
+3. Click the Distribute App button and select App Store Connect (This allows for external testers)
+4. Click distribute
+5. Once uploaded go to https://appstoreconnect.apple.com/ and log in using your Apple Developer creds
+6. Click on the App Icon
+7. Click on the Testflight tab
+8. Click on the build you just uploaded under the version
+9. Click on the external testers tab
+10. Click on the plus button to add a new group of users or individual tester
+11. Add the email address of the tester
+12. Click on the add button
+13. Click on the save button
+14. Click on the save button again
+15. Click on the notify button
+16. Click on the notify external testers button
+17. The tester will receive an email with a link to download the application
+18. The tester will need to download the Testflight app from the App Store
+19. The tester will need to click on the link in the email to download the application
+20. The tester will need to open the Testflight app and install the application
+21. The tester will need to open the application and test it
+22. The tester will need to provide feedback to the developer
+
+NOTE: Push notifications uses the Production certificate, rather than the Sandbox version, so you need to go to the Twilio Console and uncheck "sandbox."
+
+1. Go to the Twilio Console
+2. Click on admin (right hand side)
+3. Click on Account Management
+4. Got to Keys & Credentials -> Credentials
+4. Click on the Push Credentials
+5. Click on the Push Credential you created
+6. Uncheck the Sandbox box
+7. Click on the Save button
+
+This will now use the same Credential SID, but via the Production path, which TestFlight needs. See here: Reference: https://www.twilio.com/docs/voice/ios/quickstart#push-credential
+& https://fluffy.es/remote-push-notification-testflight-app-store/
