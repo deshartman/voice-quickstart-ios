@@ -104,10 +104,15 @@ class ViewController: UIViewController {
         }
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        checkForStoredEmail()
-    }
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(animated)
+		checkForStoredEmail()
+		
+		// Periodically check access token expiration - every 5 min
+		Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+			self?.checkAccessTokenExpiration()
+		}
+	}
     
     func checkForStoredEmail() {
         print("Checking for stored email...")
@@ -115,7 +120,7 @@ class ViewController: UIViewController {
        print("Attempting to access keychain...")
        if let storedEmail = try keychain.get("identity") {
            print("Stored email found: \(storedEmail)")
-           registerForPushNotifications(with: storedEmail) { success in
+		   self.registerForPushNotifications(with: storedEmail) { success in
                if success {
                    print("Successfully registered for push notifications with stored email")
                }
@@ -264,23 +269,75 @@ class ViewController: UIViewController {
             return
         }
         
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self = self, let data = data, error == nil else {
-                print("Error fetching access token: \(error?.localizedDescription ?? "Unknown error")")
-                completion(false)
-                return
-            }
-            
-            if let accessToken = String(data: data, encoding: .utf8) {
-                self.accessToken = accessToken
-                print("Access Token successfully fetched")
-                completion(true)
-            } else {
-                print("Invalid access token data received")
-                completion(false)
-            }
-        }.resume()
+		URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+			guard let self = self, let data = data, error == nil else {
+				print("Error fetching access token: \(error?.localizedDescription ?? "Unknown error")")
+				completion(false)
+				return
+			}
+			
+			if let accessToken = String(data: data, encoding: .utf8) {
+				self.accessToken = accessToken
+				print("Access Token successfully fetched")
+				DispatchQueue.main.async {
+					self.checkAccessTokenExpiration()
+				}
+				completion(true)
+			} else {
+				print("Invalid access token data received")
+				completion(false)
+			}
+		}.resume()
     }
+	
+	func checkAccessTokenExpiration() {
+		guard let accessToken = self.accessToken else {
+			print("No access token available")
+			return
+		}
+		
+		// Assuming the token is a JWT, split it and decode the payload
+		let parts = accessToken.components(separatedBy: ".")
+		guard parts.count > 1 else {
+			print("Invalid access token format")
+			return
+		}
+		
+		let payload = parts[1].padding(toLength: ((parts[1].count + 3) / 4) * 4, withPad: "=", startingAt: 0)
+		guard let data = Data(base64Encoded: payload),
+			  let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+			  let expirationTimestamp = json["exp"] as? TimeInterval else {
+			print("Unable to decode access token payload")
+			return
+		}
+		
+		let tokenExpirationDate = Date(timeIntervalSince1970: expirationTimestamp)
+		let timeUntilExpiration = tokenExpirationDate.timeIntervalSinceNow
+		
+		print("Access token expires in \(Int(timeUntilExpiration)) seconds")
+		
+		if timeUntilExpiration < 300 { // 5 minutes
+			print("Access token is about to expire. Refreshing...")
+			// Implement token refresh logic here
+			refreshAccessToken()
+		}
+	}
+	
+	func refreshAccessToken() {
+		guard let identity = try? keychain.get("identity") else {
+			print("No stored identity for token refresh")
+			return
+		}
+		
+		fetchAccessToken(identity: identity) { [weak self] success in
+			if success {
+				print("Access token refreshed successfully")
+				self?.checkAccessTokenExpiration()
+			} else {
+				print("Failed to refresh access token")
+			}
+		}
+	}
     
     func toggleUIState(isEnabled: Bool, showCallControl: Bool) {
         placeCallButton.isEnabled = isEnabled
@@ -450,6 +507,7 @@ extension ViewController: UITextFieldDelegate {
 
 extension ViewController: PushKitEventDelegate {
     func credentialsUpdated(credentials: PKPushCredentials) {
+		print("Credentials updated. Token length: \(credentials.token.count)")
         guard
             let accessToken = self.accessToken,
             let identity = try? keychain.get("identity"),
@@ -532,6 +590,8 @@ extension ViewController: PushKitEventDelegate {
     
     func incomingPushReceived(payload: PKPushPayload, completion: @escaping () -> Void) {
         NSLog("Received push notification: \(payload.dictionaryPayload)")
+		
+		checkAccessTokenExpiration()
         
         guard let aps = payload.dictionaryPayload["aps"] as? [String: Any] else {
             NSLog("Error: Invalid push notification payload structure")
