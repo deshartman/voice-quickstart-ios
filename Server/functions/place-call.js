@@ -68,7 +68,7 @@ exports.handler = async function (context, event, callback) {
 
   // Create a new Client call
   try {
-    var url = 'https://demo.twilio.com/docs/voice.xml'; // How the call is handled once connected
+    var url = 'https://twilio-retell-serverless-4508-dev.twil.io/start?agent_id=a5d4fc385db7892e2d98abacede2a11d'
     const call = await client.calls.create({
       url: url,
       to: to,

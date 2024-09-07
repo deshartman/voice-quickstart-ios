@@ -29,7 +29,9 @@ exports.handler = function (context, event, callback) {
     if (event.To === '') {
       let from = event.From;
       console.info(`Call Out: Echoing message to caller with Caller ID ${from}`);
-      voiceResponse.say('Congratulations! You have made your first Client call! Good bye.');
+      voiceResponse.say('Congratulations! You have made your first Client call! PAssing you over to our clever A.I. now');
+      // Redirect to the new URL
+      voiceResponse.redirect('https://twilio-retell-serverless-4508-dev.twil.io/start?agent_id=a5d4fc385db7892e2d98abacede2a11d');
       return callback(null, voiceResponse);
     }
 
