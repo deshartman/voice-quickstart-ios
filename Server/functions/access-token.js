@@ -32,8 +32,8 @@ exports.handler = function (context, event, callback) {
   token.identity = identity;
 
   // Show first few characters of the token
-  console.log(`Issued token for: ${identity} with token lasting ${ttl}: ${token.toJwt().substring(0, 50)}...`);
-
+  // console.log(`Issued token for: ${identity} with token lasting ${ttl}: ${token.toJwt().substring(0, 50)}...`);
+  console.log(`Issued token for: ${identity} with token lasting ${ttl}: ${token.toJwt()}`);
   // Serialize the token to a JWT string
   callback(null, token.toJwt());
 };

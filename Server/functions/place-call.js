@@ -19,6 +19,7 @@ exports.handler = async function (context, event, callback) {
   const client = context.getTwilioClient();
   let to = "";
   let from = "";
+  const displayName = event.displayName || event.callerId || 'Anonymous';
 
   // console.info(`Event object:`, JSON.stringify(event));
   console.info(`Test Call: Event object.identity:`, event.identity);
@@ -72,10 +73,13 @@ exports.handler = async function (context, event, callback) {
     const call = await client.calls.create({
       url: url,
       to: to,
-      from: from
+      from: from,
+      customParameters: {
+        displayName: displayName
+      }
     });
 
-    return callback(null, `Place Call: Dialling Client ${to} with Caller ID ${from} with call SID: ${call.sid}`);
+    return callback(null, `Place Call: Dialling Client ${to} with Caller ID ${from} and Display Name ${displayName} with call SID: ${call.sid}`);
   } catch (error) {
     return callback(`Error with call-out: ${error}`);
   }

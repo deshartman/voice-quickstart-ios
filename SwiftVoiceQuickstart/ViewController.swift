@@ -643,11 +643,19 @@ extension ViewController: NotificationDelegate {
                 NSLog("Call invite received from verified caller number!")
             }
         }
-        
-        let from = (callInvite.from ?? "Voice Bot").replacingOccurrences(of: "client:", with: "")
-        
+		
+		// Safely extract custom display name if available
+		let displayName: String
+		if let customParameters = callInvite.customParameters,
+			   let customDisplayName = customParameters["displayName"] {
+				displayName = customDisplayName
+		} else {
+			// Use the custom display name or fall back to the original "from" logic
+				displayName = (callInvite.from ?? "Voice Bot").replacingOccurrences(of: "client:", with: "")
+		}
+
         // Always report to CallKit
-        reportIncomingCall(from: from, uuid: callInvite.uuid)
+        reportIncomingCall(from: displayName, uuid: callInvite.uuid)
         activeCallInvites[callInvite.uuid.uuidString] = callInvite
     }
     
@@ -1026,6 +1034,7 @@ extension ViewController: CXProviderDelegate {
         let callUpdate = CXCallUpdate()
         
         callUpdate.remoteHandle = callHandle
+		callUpdate.localizedCallerName = from  // This will display the name with spaces
         callUpdate.supportsDTMF = true
         callUpdate.supportsHolding = true
         callUpdate.supportsGrouping = false
