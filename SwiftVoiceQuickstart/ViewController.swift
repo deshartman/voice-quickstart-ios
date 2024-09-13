@@ -624,6 +624,7 @@ extension ViewController: PushKitEventDelegate {
 extension ViewController: NotificationDelegate {
     func callInviteReceived(callInvite: CallInvite) {
         NSLog("callInviteReceived:")
+		NSLog("Custom Parameters: \(String(describing: callInvite.customParameters))")
         
         guard let _ = self.accessToken else {
             NSLog("Error: Access token not available when receiving call invite")
@@ -649,9 +650,11 @@ extension ViewController: NotificationDelegate {
 		if let customParameters = callInvite.customParameters,
 			   let customDisplayName = customParameters["displayName"] {
 				displayName = customDisplayName
+			NSLog("Using custom display name: \(displayName)")
 		} else {
 			// Use the custom display name or fall back to the original "from" logic
 				displayName = (callInvite.from ?? "Voice Bot").replacingOccurrences(of: "client:", with: "")
+			NSLog("Using default display name: \(displayName)")
 		}
 
         // Always report to CallKit
@@ -879,6 +882,9 @@ extension ViewController: CallDelegate {
         
         ringtonePlayer.stop()
     }
+	
+	
+	
 }
 
 
@@ -1034,7 +1040,8 @@ extension ViewController: CXProviderDelegate {
         let callUpdate = CXCallUpdate()
         
         callUpdate.remoteHandle = callHandle
-		callUpdate.localizedCallerName = from  // This will display the name with spaces
+		callUpdate.localizedCallerName = from  // This should now be our custom display name
+		NSLog("Reporting incoming call with name: \(from)")
         callUpdate.supportsDTMF = true
         callUpdate.supportsHolding = true
         callUpdate.supportsGrouping = false

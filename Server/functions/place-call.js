@@ -20,6 +20,7 @@ exports.handler = async function (context, event, callback) {
   let to = "";
   let from = "";
   const displayName = event.displayName || event.callerId || 'Anonymous';
+  console.info(`Place Call: Display Name ${displayName}`);
 
   // console.info(`Event object:`, JSON.stringify(event));
   console.info(`Test Call: Event object.identity:`, event.identity);
@@ -44,20 +45,20 @@ exports.handler = async function (context, event, callback) {
       console.log(`event.callerId check: Event object.callerId:`, 'anonymous');
     }
 
-    console.info(`Call Out: Dialling Client ${to} with Caller ID ${from}`);
+    console.info(`Place Call: Dialling Client ${to} with Caller ID ${from}`);
   }
 
   // If the SIP domain is passed in, then dial To number on the SIP domain, using the event.From as the caller ID.
   if (event.domain) {
     to = `${event.To}@${event.domain}`;
     from = event.From;
-    console.info(`Call Out: Dialling sip:${to} with Caller ID ${from}`);
+    console.info(`Place Call: Dialling sip:${to} with Caller ID ${from}`);
   }
   // If no identity or SIP domain is passed in and there is a To number, then dial the number.
   if (!event.identity && !event.domain && event.To) {  // Possibly redundant check later
     let to = event.To;
     let from = event.From;
-    console.info(`Call Out: Dialling Number ${to} with Caller ID ${from}`);
+    console.info(`Place Call: Dialling Number ${to} with Caller ID ${from}`);
   }
 
   if (!to) {
