@@ -19,7 +19,7 @@ exports.handler = async function (context, event, callback) {
   const client = context.getTwilioClient();
   let to = "";
   let from = "";
-  const displayName = event.displayName || event.callerId || 'Anonymous';
+  const displayName = event.displayName || event.callerId || 'Trusted%20Caller';  // Default to URL Encoded "Trusted Caller" if no display name is passed in
   console.info(`Place Call: Display Name ${displayName}`);
 
   // console.info(`Event object:`, JSON.stringify(event));
@@ -28,21 +28,23 @@ exports.handler = async function (context, event, callback) {
   console.info("Test Call: Event object.callerId:", event.callerId);
   console.info(`Test Call: Event object.To:`, event.To);
   console.info(`Test Call: Event object.From:`, event.From);
+  console.info("Call SID:", event.callSid);
 
   // If the identity is passed in, then dial the client.
   if (event.identity) {
     to = `client:${event.identity}`;
+    console.info(`identity.event.to: ${to}`);
     // Check if there is a value for the "From" field, add it, else use event.callerId
     if (event.From) {
       from = `client:${event.From}`;
-      console.log(`event.From check: Event object.From:`, event.From);
+      console.log(`identity.event.From check: Event object.From:`, event.From);
     }
     if (event.callerId) {
       from = `client:${event.callerId}`;
-      console.log(`event.callerId check: Event object.callerId:`, event.callerId);
+      console.log(`identity.event.callerId check: Event object.callerId:`, event.callerId);
     } else {
       from = `client:anonymous`;
-      console.log(`event.callerId check: Event object.callerId:`, 'anonymous');
+      console.log(`identity.event.callerId check: Event object.callerId:`, 'anonymous');
     }
 
     console.info(`Place Call: Dialling Client ${to} with Caller ID ${from}`);
@@ -73,9 +75,9 @@ exports.handler = async function (context, event, callback) {
     var url = 'https://twilio-retell-serverless-4508-dev.twil.io/start?agent_id=a5d4fc385db7892e2d98abacede2a11d'
     const call = await client.calls.create({
       url: url,
-      to: to,
+      to: `${to}?displayName=${displayName}`,
       from: from,
-      customParameters: {
+      parameter: {
         displayName: displayName
       }
     });
