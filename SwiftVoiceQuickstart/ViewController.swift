@@ -11,6 +11,7 @@ import PushKit
 import CallKit
 import TwilioVoice
 import KeychainAccess
+import UserNotifications
 
 
 let twimlParamTo = "to"
@@ -490,6 +491,8 @@ class ViewController: UIViewController {
             }
         }
     }
+	
+	
 }
 
 
@@ -623,9 +626,10 @@ extension ViewController: PushKitEventDelegate {
 
 extension ViewController: NotificationDelegate {
     func callInviteReceived(callInvite: CallInvite) {
-        NSLog("callInviteReceived:")
-		NSLog("Custom Parameters: \(String(describing: callInvite.customParameters))")
-        
+		NSLog("callInviteReceived:")
+		NSLog("TVOCallInvite Parameters:")
+		NSLog("- Custom Parameters: \(String(describing: callInvite.customParameters))")
+				
         guard let _ = self.accessToken else {
             NSLog("Error: Access token not available when receiving call invite")
             return
@@ -684,7 +688,7 @@ extension ViewController: NotificationDelegate {
 
 extension ViewController: CallDelegate {
     func callDidStartRinging(call: Call) {
-        NSLog("callDidStartRinging:")
+        NSLog("CallDelegate:callDidStartRinging:")
         
         placeCallButton.setTitle("Ringing", for: .normal)
         
@@ -700,8 +704,10 @@ extension ViewController: CallDelegate {
     }
     
     func callDidConnect(call: Call) {
-        NSLog("callDidConnect:")
-        
+		NSLog("CallDelegate:callDidConnect called for call SID: \(call.sid)")
+
+		
+		
         if playCustomRingback {
             stopRingback()
         }
@@ -718,7 +724,7 @@ extension ViewController: CallDelegate {
     }
     
     func callIsReconnecting(call: Call, error: Error) {
-        NSLog("call:isReconnectingWithError:")
+        NSLog("CallDelegate:call:isReconnectingWithError:")
         
         placeCallButton.setTitle("Reconnecting", for: .normal)
         
@@ -726,7 +732,7 @@ extension ViewController: CallDelegate {
     }
     
     func callDidReconnect(call: Call) {
-        NSLog("callDidReconnect:")
+        NSLog("CallDelegate:callDidReconnect:")
         
         placeCallButton.setTitle("Hang Up", for: .normal)
         
@@ -734,7 +740,7 @@ extension ViewController: CallDelegate {
     }
     
     func callDidFailToConnect(call: Call, error: Error) {
-        NSLog("Call failed to connect: \(error.localizedDescription)")
+        NSLog("CallDelegate:Call failed to connect: \(error.localizedDescription)")
         
         if let completion = callKitCompletionCallback {
             completion(false)
@@ -749,9 +755,9 @@ extension ViewController: CallDelegate {
     
     func callDidDisconnect(call: Call, error: Error?) {
         if let error = error {
-            NSLog("Call failed: \(error.localizedDescription)")
+            NSLog("CallDelegate:Call failed: \(error.localizedDescription)")
         } else {
-            NSLog("Call disconnected")
+            NSLog("CallDelegate:Call disconnected")
         }
         
         if !userInitiatedDisconnect {
@@ -873,7 +879,7 @@ extension ViewController: CallDelegate {
             ringtonePlayer?.volume = 1.0
             ringtonePlayer?.play()
         } catch {
-            NSLog("Failed to initialize audio player")
+            NSLog("CallDelegate:Failed to initialize audio player")
         }
     }
     
@@ -882,9 +888,31 @@ extension ViewController: CallDelegate {
         
         ringtonePlayer.stop()
     }
-	
-	
-	
+}
+
+// MARK: - TVOCallMessageDelegate
+
+extension ViewController: CallMessageDelegate {
+	func callDidReceiveMessage(call: Call, message callMessage: CallMessage) {
+		NSLog("callDidReceiveMessage method called for call SID: \(call.sid)")
+		NSLog("Received message: \(callMessage)")
+		
+		// The CallMessage type likely has properties that contain the message content
+		// You might need to check the Twilio Voice iOS SDK documentation for the exact structure
+		// For now, let's log the entire callMessage object
+		
+		// If the message is in JSON format, you can try to parse it like this:
+		if let jsonData = callMessage.content.data(using: .utf8),
+		   let json = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
+			if let message = json["message"] as? String {
+				NSLog("Parsed message: \(message)")
+			} else {
+				NSLog("Parsed JSON: \(json)")
+			}
+		} else {
+			NSLog("Message content: \(callMessage.content)")
+		}
+	}
 }
 
 
@@ -892,30 +920,30 @@ extension ViewController: CallDelegate {
 
 extension ViewController: CXProviderDelegate {
     func providerDidReset(_ provider: CXProvider) {
-        NSLog("providerDidReset:")
+        NSLog("CXProviderDelegate:providerDidReset:")
         audioDevice.isEnabled = false
     }
     
     func providerDidBegin(_ provider: CXProvider) {
-        NSLog("providerDidBegin")
+        NSLog("CXProviderDelegate:providerDidBegin")
     }
     
     func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-        NSLog("provider:didActivateAudioSession:")
+        NSLog("CXProviderDelegate:provider:didActivateAudioSession:")
         audioDevice.isEnabled = true
     }
     
     func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
-        NSLog("provider:didDeactivateAudioSession:")
+        NSLog("CXProviderDelegate:provider:didDeactivateAudioSession:")
         audioDevice.isEnabled = false
     }
     
     func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
-        NSLog("provider:timedOutPerformingAction:")
+        NSLog("CXProviderDelegate:provider:timedOutPerformingAction:")
     }
     
     func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
-        NSLog("provider:performStartCallAction:")
+        NSLog("CXProviderDelegate:provider:performStartCallAction:")
         
         toggleUIState(isEnabled: false, showCallControl: false)
         startSpin()
@@ -924,10 +952,10 @@ extension ViewController: CXProviderDelegate {
         
         performVoiceCall(uuid: action.callUUID, client: "") { success in
             if success {
-                NSLog("performVoiceCall() successful")
+                NSLog("CXProviderDelegate:performVoiceCall() successful")
                 provider.reportOutgoingCall(with: action.callUUID, connectedAt: Date())
             } else {
-                NSLog("performVoiceCall() failed")
+                NSLog("CXProviderDelegate:performVoiceCall() failed")
             }
         }
         
@@ -935,13 +963,13 @@ extension ViewController: CXProviderDelegate {
     }
     
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-        NSLog("provider:performAnswerCallAction:")
+        NSLog("CXProviderDelegate:provider:performAnswerCallAction:")
         
         performAnswerVoiceCall(uuid: action.callUUID) { success in
             if success {
-                NSLog("performAnswerVoiceCall() successful")
+                NSLog("CXProviderDelegate:performAnswerVoiceCall() successful")
             } else {
-                NSLog("performAnswerVoiceCall() failed")
+                NSLog("CXProviderDelegate:performAnswerVoiceCall() failed")
             }
         }
         
@@ -949,7 +977,7 @@ extension ViewController: CXProviderDelegate {
     }
     
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
-        NSLog("provider:performEndCallAction:")
+        NSLog("CXProviderDelegate:provider:performEndCallAction:")
         
         if let invite = activeCallInvites[action.callUUID.uuidString] {
             invite.reject()
@@ -957,14 +985,14 @@ extension ViewController: CXProviderDelegate {
         } else if let call = activeCalls[action.callUUID.uuidString] {
             call.disconnect()
         } else {
-            NSLog("Unknown UUID to perform end-call action with")
+            NSLog("CXProviderDelegate:Unknown UUID to perform end-call action with")
         }
         
         action.fulfill()
     }
     
     func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
-        NSLog("provider:performSetHeldAction:")
+        NSLog("CXProviderDelegate:provider:performSetHeldAction:")
         
         if let call = activeCalls[action.callUUID.uuidString] {
             call.isOnHold = action.isOnHold
@@ -987,7 +1015,7 @@ extension ViewController: CXProviderDelegate {
     }
     
     func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
-        NSLog("provider:performSetMutedAction:")
+        NSLog("CXProviderDelegate:provider:performSetMutedAction:")
         
         if let call = activeCalls[action.callUUID.uuidString] {
             call.isMuted = action.isMuted
@@ -1001,7 +1029,7 @@ extension ViewController: CXProviderDelegate {
     // MARK: Call Kit Actions
     func performStartCallAction(uuid: UUID, handle: String) {
         guard let provider = callKitProvider else {
-            NSLog("CallKit provider not available")
+            NSLog("performStartCallAction:CallKit provider not available")
             return
         }
         
@@ -1011,11 +1039,11 @@ extension ViewController: CXProviderDelegate {
         
         callKitCallController.request(transaction) { error in
             if let error = error {
-                NSLog("StartCallAction transaction request failed: \(error.localizedDescription)")
+                NSLog("performStartCallAction:StartCallAction transaction request failed: \(error.localizedDescription)")
                 return
             }
             
-            NSLog("StartCallAction transaction request successful")
+            NSLog("performStartCallAction:StartCallAction transaction request successful")
             
             let callUpdate = CXCallUpdate()
             
@@ -1081,6 +1109,7 @@ extension ViewController: CXProviderDelegate {
         let connectOptions = ConnectOptions(accessToken: accessToken) { builder in
             builder.params = [twimlParamTo: self.outgoingValue.text ?? ""]
             builder.uuid = uuid
+			builder.callMessageDelegate = self  // Add this line
         }
         
         let call = TwilioVoiceSDK.connect(options: connectOptions, delegate: self)
@@ -1092,17 +1121,22 @@ extension ViewController: CXProviderDelegate {
     func performAnswerVoiceCall(uuid: UUID, completionHandler: @escaping (Bool) -> Void) {
         guard let callInvite = activeCallInvites[uuid.uuidString] else {
             NSLog("No CallInvite matches the UUID")
+			completionHandler(false)
             return
         }
         
         let acceptOptions = AcceptOptions(callInvite: callInvite) { builder in
             builder.uuid = callInvite.uuid
+			builder.callMessageDelegate = self  // Add this line
         }
         
-        let call = callInvite.accept(options: acceptOptions, delegate: self)
-        activeCall = call
-        activeCalls[call.uuid!.uuidString] = call
-        callKitCompletionCallback = completionHandler
+		let call = callInvite.accept(options: acceptOptions, delegate: self)
+		NSLog("Call accepted with UUID: \(call.uuid?.uuidString ?? "unknown")")
+		activeCall = call
+		activeCalls[call.uuid!.uuidString] = call
+		callKitCompletionCallback = completionHandler
+		
+		
         
         activeCallInvites.removeValue(forKey: uuid.uuidString)
         

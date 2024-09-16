@@ -111,6 +111,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PKPushRegistryDelegate {
      */
     func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType, completion: @escaping () -> Void) {
         NSLog("pushRegistry:didReceiveIncomingPushWithPayload:forType:completion:")
+		NSLog("Received push notification: \(payload.dictionaryPayload)")
+
 
         if let delegate = self.pushKitEventDelegate {
             delegate.incomingPushReceived(payload: payload, completion: completion)

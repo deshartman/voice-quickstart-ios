@@ -257,18 +257,73 @@ To learn more about how to use TwiML and the Programmable Voice Calls API, check
 * [TwiML Quickstart for Java](https://www.twilio.com/docs/voice/quickstart/java)
 * [TwiML Quickstart for C#](https://www.twilio.com/docs/voice/quickstart/csharp)
 
-## Issues and Support
+# Custom Message Handling in iOS Voice Client
 
-Please file any issues you find here on Github: [Voice Swift Quickstart](https://github.com/twilio/voice-quickstart-ios).
-Please ensure that you are not sharing any
-[Personally Identifiable Information(PII)](https://www.twilio.com/docs/glossary/what-is-personally-identifiable-information-pii)
-or sensitive account information (API keys, credentials, etc.) when reporting an issue.
+This update implements custom message handling for the Twilio Voice iOS SDK. It allows the iOS client to receive and process messages sent from the server during an active call.
 
-For general inquiries related to the Voice SDK you can [file a support ticket](https://support.twilio.com/hc/en-us/requests/new).
+## Changes Made
 
-## License
+1. Updated `ViewController.swift` to implement the `CallMessageDelegate` protocol.
+2. Modified `performVoiceCall` and `performAnswerVoiceCall` functions to set the message delegate.
+3. Implemented the `callDidReceiveMessage` method to handle incoming messages.
 
-MIT
+### Code to Add
+
+To enable custom message handling in your iOS Voice client, add the following code:
+
+1. In `ViewController.swift`, add the `CallMessageDelegate` extension:
+
+```swift
+// MARK: - CallMessageDelegate
+
+extension ViewController: CallMessageDelegate {
+    func callDidReceiveMessage(call: Call, message callMessage: CallMessage) {
+        NSLog("callDidReceiveMessage method called for call SID: \(call.sid)")
+        NSLog("Received message: \(callMessage)")
+        
+        if let jsonData = callMessage.content.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
+           let message = json["message"] as? String {
+            NSLog("Parsed message: \(message)")
+            // Handle the received message here
+        } else {
+            NSLog("Failed to parse message or unexpected format. Raw content: \(callMessage.content)")
+        }
+    }
+}
+```
+Update the performVoiceCall function in your ViewController:
+
+```swift
+func performVoiceCall(uuid: UUID, client: String?, completionHandler: @escaping (Bool) -> Void) {
+    guard let accessToken = self.accessToken else {
+        print("Access token not available")
+        completionHandler(false)
+        return
+    }
+    
+    let connectOptions = ConnectOptions(accessToken: accessToken) { builder in
+        builder.params = [twimlParamTo: self.outgoingValue.text ?? ""]
+        builder.uuid = uuid
+        builder.messageDelegate = self  // Add this line
+```
+
+Update the performAnswerVoiceCall function in your ViewController:
+
+```swift
+func performAnswerVoiceCall(uuid: UUID, completionHandler: @escaping (Bool) -> Void) {
+    guard let callInvite = activeCallInvites[uuid.uuidString] else {
+        NSLog("No CallInvite matches the UUID")
+        completionHandler(false)
+        return
+    }
+    
+    let acceptOptions = AcceptOptions(callInvite: callInvite) { builder in
+        builder.uuid = callInvite.uuid
+        builder.messageDelegate = self  // Add this line
+```
+
+On the server side, you can send a message to the client during an active call using the send-message.js file once you have the call SID
 
 # Distribution #
 The next section will describe how to distribute the application via Testflight. This allows you to bundle up the package and distribute it to your testers. We will use external testers for this example.
@@ -309,3 +364,19 @@ NOTE: Push notifications uses the Production certificate, rather than the Sandbo
 
 This will now use the same Credential SID, but via the Production path, which TestFlight needs. See here: Reference: https://www.twilio.com/docs/voice/ios/quickstart#push-credential
 & https://fluffy.es/remote-push-notification-testflight-app-store/
+
+
+## Issues and Support
+
+Please file any issues you find here on Github: [Voice Swift Quickstart](https://github.com/twilio/voice-quickstart-ios).
+Please ensure that you are not sharing any
+[Personally Identifiable Information(PII)](https://www.twilio.com/docs/glossary/what-is-personally-identifiable-information-pii)
+or sensitive account information (API keys, credentials, etc.) when reporting an issue.
+
+For general inquiries related to the Voice SDK you can [file a support ticket](https://support.twilio.com/hc/en-us/requests/new).
+
+## License
+
+MIT
+
+
