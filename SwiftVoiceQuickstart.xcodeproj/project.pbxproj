@@ -20,7 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		24BA34331D874AC800B0B4F7 /* SwiftVoiceQuickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftVoiceQuickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		24BA34331D874AC800B0B4F7 /* Voice SDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Voice SDK.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		24BA34361D874AC800B0B4F7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		24BA34381D874AC800B0B4F7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		24BA343B1D874AC800B0B4F7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -61,7 +61,7 @@
 		24BA34341D874AC800B0B4F7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				24BA34331D874AC800B0B4F7 /* SwiftVoiceQuickstart.app */,
+				24BA34331D874AC800B0B4F7 /* Voice SDK.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,9 +107,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		24BA34321D874AC800B0B4F7 /* SwiftVoiceQuickstart */ = {
+		24BA34321D874AC800B0B4F7 /* Voice SDK */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 24BA34451D874AC800B0B4F7 /* Build configuration list for PBXNativeTarget "SwiftVoiceQuickstart" */;
+			buildConfigurationList = 24BA34451D874AC800B0B4F7 /* Build configuration list for PBXNativeTarget "Voice SDK" */;
 			buildPhases = (
 				24BA342F1D874AC800B0B4F7 /* Sources */,
 				24BA34301D874AC800B0B4F7 /* Frameworks */,
@@ -119,13 +119,13 @@
 			);
 			dependencies = (
 			);
-			name = SwiftVoiceQuickstart;
+			name = "Voice SDK";
 			packageProductDependencies = (
 				8F56E8D525C8B25E00B5AB19 /* TwilioVoice */,
 				2A1E25D82C85B1E8005103C2 /* KeychainAccess */,
 			);
 			productName = SwiftVoiceQuickstart;
-			productReference = 24BA34331D874AC800B0B4F7 /* SwiftVoiceQuickstart.app */;
+			productReference = 24BA34331D874AC800B0B4F7 /* Voice SDK.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -170,7 +170,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				24BA34321D874AC800B0B4F7 /* SwiftVoiceQuickstart */,
+				24BA34321D874AC800B0B4F7 /* Voice SDK */,
 			);
 		};
 /* End PBXProject section */
@@ -352,7 +352,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 2CVPZF6SMG;
 				INFOPLIST_FILE = SwiftVoiceQuickstart/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Twilio Voice";
+				INFOPLIST_KEY_CFBundleDisplayName = "Voice SDK";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -383,7 +383,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 2CVPZF6SMG;
 				INFOPLIST_FILE = SwiftVoiceQuickstart/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Twilio Voice";
+				INFOPLIST_KEY_CFBundleDisplayName = "Voice SDK";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -415,7 +415,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		24BA34451D874AC800B0B4F7 /* Build configuration list for PBXNativeTarget "SwiftVoiceQuickstart" */ = {
+		24BA34451D874AC800B0B4F7 /* Build configuration list for PBXNativeTarget "Voice SDK" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				24BA34461D874AC800B0B4F7 /* Debug */,

@@ -34,6 +34,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var callControlView: UIView!
     @IBOutlet weak var muteSwitch: UISwitch!
     @IBOutlet weak var speakerSwitch: UISwitch!
+	@IBOutlet weak var messageLabel: UILabel!
     
     var incomingPushCompletionCallback: (() -> Void)?
     
@@ -103,7 +104,30 @@ class ViewController: UIViewController {
         if let params = LogParameters.init(module:TwilioVoiceSDK.LogModule.platform , logLevel: TwilioVoiceSDK.LogLevel.debug, message: "The default logger is used for app logs") {
             defaultLogger.log(params: params)
         }
+		
+		// Initialize the message label
+		   setupMessageLabel()
     }
+	
+	func setupMessageLabel() {
+		let newLabel = UILabel()
+		newLabel.translatesAutoresizingMaskIntoConstraints = false
+		newLabel.textAlignment = .center
+		newLabel.font = UIFont.systemFont(ofSize: 12)
+		newLabel.textColor = .darkGray
+		newLabel.numberOfLines = 0
+		view.addSubview(newLabel)
+
+		NSLayoutConstraint.activate([
+			newLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+			newLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+			newLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
+			newLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
+		])
+
+		// Assign the new label to our weak property
+		self.messageLabel = newLabel
+	}
     
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
@@ -796,6 +820,10 @@ extension ViewController: CallDelegate {
             guard let activeCall = getActiveCall() else { return }
             toggleUIState(isEnabled: true, showCallControl: true)
         }
+		
+		DispatchQueue.main.async {
+			self.messageLabel.text = ""
+		}
     }
     
     func callDidReceiveQualityWarnings(call: Call, currentWarnings: Set<NSNumber>, previousWarnings: Set<NSNumber>) {
@@ -897,20 +925,24 @@ extension ViewController: CallMessageDelegate {
 		NSLog("callDidReceiveMessage method called for call SID: \(call.sid)")
 		NSLog("Received message: \(callMessage)")
 		
-		// The CallMessage type likely has properties that contain the message content
-		// You might need to check the Twilio Voice iOS SDK documentation for the exact structure
-		// For now, let's log the entire callMessage object
-		
-		// If the message is in JSON format, you can try to parse it like this:
 		if let jsonData = callMessage.content.data(using: .utf8),
 		   let json = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
 			if let message = json["message"] as? String {
 				NSLog("Parsed message: \(message)")
+				DispatchQueue.main.async {
+					self.messageLabel.text = message
+				}
 			} else {
 				NSLog("Parsed JSON: \(json)")
+				DispatchQueue.main.async {
+					self.messageLabel.text = callMessage.content
+				}
 			}
 		} else {
 			NSLog("Message content: \(callMessage.content)")
+			DispatchQueue.main.async {
+				self.messageLabel.text = callMessage.content
+			}
 		}
 	}
 }
