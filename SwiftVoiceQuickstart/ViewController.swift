@@ -35,6 +35,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var muteSwitch: UISwitch!
     @IBOutlet weak var speakerSwitch: UISwitch!
 	@IBOutlet weak var messageLabel: UILabel!
+	@IBOutlet weak var identityLabel: UILabel!
     
     var incomingPushCompletionCallback: (() -> Void)?
     
@@ -106,27 +107,30 @@ class ViewController: UIViewController {
         }
 		
 		// Initialize the message label
-		   setupMessageLabel()
+		updateMessageLabel(with: "No Messages yet")
+		
+		// Set up the identity label
+		updateIdentityLabel()
     }
+
+	func updateMessageLabel(with text: String) {
+		DispatchQueue.main.async { [weak self] in
+			guard let self = self else { return }
+			self.messageLabel?.text = "Messages: \(text)"
+			print("Updating messageLabel with text: \(text)")
+		}
+	}
 	
-	func setupMessageLabel() {
-		let newLabel = UILabel()
-		newLabel.translatesAutoresizingMaskIntoConstraints = false
-		newLabel.textAlignment = .center
-		newLabel.font = UIFont.systemFont(ofSize: 12)
-		newLabel.textColor = .darkGray
-		newLabel.numberOfLines = 0
-		view.addSubview(newLabel)
-
-		NSLayoutConstraint.activate([
-			newLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-			newLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-			newLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
-			newLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
-		])
-
-		// Assign the new label to our weak property
-		self.messageLabel = newLabel
+	func updateIdentityLabel() {
+		DispatchQueue.main.async { [weak self] in
+			guard let self = self else { return }
+			
+			if let identity = try? self.keychain.get("identity") {
+				self.identityLabel?.text = "Current identity: \(identity)"
+			} else {
+				self.identityLabel?.text = "No identity set"
+			}
+		}
 	}
     
 	override func viewDidAppear(_ animated: Bool) {
@@ -219,7 +223,8 @@ class ViewController: UIViewController {
         do {
             try keychain.set(email, key: "identity")
             print("Email saved: \(email)")
-        } catch {
+			updateIdentityLabel()
+		} catch {
             print("Error saving email to keychain: \(error)")
         }
     }
@@ -821,10 +826,8 @@ extension ViewController: CallDelegate {
             toggleUIState(isEnabled: true, showCallControl: true)
         }
 		
-		DispatchQueue.main.async {
-			self.messageLabel.text = ""
-		}
-    }
+		updateMessageLabel(with: "")
+	}
     
     func callDidReceiveQualityWarnings(call: Call, currentWarnings: Set<NSNumber>, previousWarnings: Set<NSNumber>) {
         /**
@@ -929,20 +932,14 @@ extension ViewController: CallMessageDelegate {
 		   let json = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
 			if let message = json["message"] as? String {
 				NSLog("Parsed message: \(message)")
-				DispatchQueue.main.async {
-					self.messageLabel.text = message
-				}
+				updateMessageLabel(with: message)
 			} else {
 				NSLog("Parsed JSON: \(json)")
-				DispatchQueue.main.async {
-					self.messageLabel.text = callMessage.content
-				}
+				updateMessageLabel(with: callMessage.content)
 			}
 		} else {
 			NSLog("Message content: \(callMessage.content)")
-			DispatchQueue.main.async {
-				self.messageLabel.text = callMessage.content
-			}
+			updateMessageLabel(with: callMessage.content)
 		}
 	}
 }

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="SwiftVoiceQuickstart" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="Voice_SDK" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -23,7 +23,6 @@
                                 <rect key="frame" x="67.5" y="116" width="240" height="240"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="wqn-ZD-zTx" secondAttribute="height" multiplier="1:1" id="3fG-Bb-d0i"/>
-                                    <constraint firstAttribute="width" secondItem="wqn-ZD-zTx" secondAttribute="height" multiplier="1:1" id="Ixe-Ao-E58"/>
                                     <constraint firstAttribute="width" constant="240" id="eQS-aZ-GXk"/>
                                 </constraints>
                             </imageView>
@@ -107,7 +106,18 @@
                                     <segue destination="XYZ-AB-CDE" kind="presentation" identifier="showEmailPopover" modalPresentationStyle="formSheet" id="newEmailSegue"/>
                                 </connections>
                             </button>
-
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Current identity: " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="identityLabel">
+                                <rect key="frame" x="20" y="635.5" width="335" height="14.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="newMessageLabel">
+                                <rect key="frame" x="20" y="647" width="335" height="0.0"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -120,19 +130,26 @@
                             <constraint firstItem="rhQ-vm-Q9J" firstAttribute="firstBaseline" secondItem="wqn-ZD-zTx" secondAttribute="baseline" constant="42.5" id="ckB-PB-Pwa"/>
                             <constraint firstItem="wqn-ZD-zTx" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" constant="-97.5" id="dib-4M-LIF"/>
                             <constraint firstItem="zwV-cd-S0l" firstAttribute="top" secondItem="rhQ-vm-Q9J" secondAttribute="bottom" constant="8" id="iHE-nh-FMY"/>
+                            <constraint firstItem="identityLabel" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="identityLabelLeadingConstraint"/>
+                            <constraint firstItem="identityLabel" firstAttribute="top" secondItem="newEmailButton" secondAttribute="bottom" constant="8" id="identityLabelTopConstraint"/>
+                            <constraint firstAttribute="trailing" secondItem="identityLabel" secondAttribute="trailing" constant="20" id="identityLabelTrailingConstraint"/>
                             <constraint firstItem="zwV-cd-S0l" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="jUO-8C-BeK"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="newMessageLabel" secondAttribute="bottom" constant="20" id="messageBottomConstraint"/>
+                            <constraint firstItem="newMessageLabel" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="messageLeadingConstraint"/>
+                            <constraint firstAttribute="trailing" secondItem="newMessageLabel" secondAttribute="trailing" constant="20" id="messageTrailingConstraint"/>
+                            <constraint firstItem="newEmailButton" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="newEmailCenterConstraint"/>
+                            <constraint firstItem="newEmailButton" firstAttribute="top" secondItem="Ruy-Jc-pNi" secondAttribute="bottom" constant="8" id="newEmailTopConstraint"/>
+                            <constraint firstItem="newEmailButton" firstAttribute="width" secondItem="Ruy-Jc-pNi" secondAttribute="width" id="newEmailWidthConstraint"/>
                             <constraint firstItem="bYe-ax-z7H" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="343:667" id="qjg-O5-9qH"/>
                             <constraint firstItem="rhQ-vm-Q9J" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="usP-tX-t3X"/>
                             <constraint firstItem="Ruy-Jc-pNi" firstAttribute="top" secondItem="Uic-jJ-PVN" secondAttribute="bottom" constant="8" id="zYm-Ph-T9F"/>
-                            <constraint firstItem="newEmailButton" firstAttribute="top" secondItem="Ruy-Jc-pNi" secondAttribute="bottom" constant="8" id="newEmailTopConstraint"/>
-                            <constraint firstItem="newEmailButton" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="newEmailCenterConstraint"/>
-                            <constraint firstItem="newEmailButton" firstAttribute="width" secondItem="Ruy-Jc-pNi" secondAttribute="width" id="newEmailWidthConstraint"/>
-
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="callControlView" destination="Ruy-Jc-pNi" id="vQY-i1-hxV"/>
                         <outlet property="iconView" destination="wqn-ZD-zTx" id="Wko-Lc-Lcn"/>
+                        <outlet property="identityLabel" destination="identityLabel" id="identityLabelConnection"/>
+                        <outlet property="messageLabel" destination="newMessageLabel" id="messageOutletConnection"/>
                         <outlet property="muteSwitch" destination="3ee-Gh-QDM" id="d1C-2s-MOF"/>
                         <outlet property="outgoingValue" destination="rhQ-vm-Q9J" id="MSu-Nc-DfV"/>
                         <outlet property="placeCallButton" destination="Uic-jJ-PVN" id="oeG-C0-Aoq"/>
@@ -148,22 +165,22 @@
         <!--Email Input View Controller-->
         <scene sceneID="DEF-GH-IJK">
             <objects>
-                <viewController id="XYZ-AB-CDE" customClass="EmailInputViewController" customModule="SwiftVoiceQuickstart" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="XYZ-AB-CDE" customClass="EmailInputViewController" customModule="Voice_SDK" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="LMN-OP-QRS"/>
                         <viewControllerLayoutGuide type="bottom" id="TUV-WX-YZA"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="BCD-EF-GHI">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter your email" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="JKL-MN-OPQ">
-                                <rect key="frame" x="20" y="318.5" width="335" height="30"/>
+                                <rect key="frame" x="20" y="306.5" width="335" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RST-UV-WXY">
-                                <rect key="frame" x="20" y="368.5" width="335" height="30"/>
+                                <rect key="frame" x="20" y="360.5" width="335" height="30"/>
                                 <state key="normal" title="Submit"/>
                                 <connections>
                                     <action selector="submitButtonTapped:" destination="XYZ-AB-CDE" eventType="touchUpInside" id="987-65-432"/>
@@ -172,12 +189,12 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstAttribute="trailing" secondItem="RST-UV-WXY" secondAttribute="trailing" constant="20" id="456-78-901"/>
+                            <constraint firstItem="RST-UV-WXY" firstAttribute="leading" secondItem="BCD-EF-GHI" secondAttribute="leading" constant="20" id="678-90-123"/>
                             <constraint firstItem="JKL-MN-OPQ" firstAttribute="centerY" secondItem="BCD-EF-GHI" secondAttribute="centerY" id="ABC-DE-FGH"/>
                             <constraint firstItem="JKL-MN-OPQ" firstAttribute="leading" secondItem="BCD-EF-GHI" secondAttribute="leading" constant="20" id="HIJ-KL-MNO"/>
                             <constraint firstAttribute="trailing" secondItem="JKL-MN-OPQ" secondAttribute="trailing" constant="20" id="PQR-ST-UVW"/>
                             <constraint firstItem="RST-UV-WXY" firstAttribute="top" secondItem="JKL-MN-OPQ" secondAttribute="bottom" constant="20" id="XYZ-12-345"/>
-                            <constraint firstItem="RST-UV-WXY" firstAttribute="leading" secondItem="BCD-EF-GHI" secondAttribute="leading" constant="20" id="678-90-123"/>
-                            <constraint firstAttribute="trailing" secondItem="RST-UV-WXY" secondAttribute="trailing" constant="20" id="456-78-901"/>
                         </constraints>
                     </view>
                     <connections>
@@ -189,6 +206,9 @@
             <point key="canvasLocation" x="890" y="118"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="newEmailSegue"/>
+    </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.8862745098" green="0.1137254902" blue="0.1450980392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
     <resources>
         <image name="TwilioLogo.png" width="296" height="296"/>
