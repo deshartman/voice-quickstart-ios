@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>AccessTokenServerURL</key>
-	<string>https://swiftvoicequickstart-9043-dev.twil.io/access-token</string>
+	<string>https://swiftvoicequickstart-3343-dev.twil.io/access-token</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
