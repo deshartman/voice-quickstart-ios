@@ -182,7 +182,7 @@ NOTE: using the -legacy flag is necessary to ensure that the certificate and key
 
 Use Twilio CLI to create a Push Credential using the cert and key.
 
-$ twilio api:chat:v2:credentials:create \
+$ twilio api:conversations:v1:credentials:create \
     --type=apn \
     --sandbox \
     --friendly-name="voice-push-credential (sandbox)" \

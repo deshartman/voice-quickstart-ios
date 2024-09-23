@@ -1,22 +1,33 @@
 /**
  * This function places a call based on the type of "to" passed in
+ * or disconnects an active call if a callSid is provided
  * 
  * event.To = Dial a PSTN number
  * event.identity = Dial a Client
  * event.domain = Dial a SIP domain
  * event.callerId = Caller ID for the call
+ * event.callSid = Disconnect an active call
  * 
  * Usage:
  * ======
  * https://' + context.DOMAIN_NAME + '/place-call?identity=alice&callerId=SomeName
- * 
- * // Assumes called via Prog Voice number and has a To: and From: numbers
  * https://' + context.DOMAIN_NAME + '/place-call?domain=somedomain.sip.twilio.com
  * https://' + context.DOMAIN_NAME + '/place-call             
+ * https://' + context.DOMAIN_NAME + '/place-call?callSid=CAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
  * 
  */
 exports.handler = async function (context, event, callback) {
   const client = context.getTwilioClient();
+
+  if (event.callSid) {
+    try {
+      await client.calls(event.callSid).update({ status: 'completed' });
+      return callback(null, `Call with SID ${event.callSid} has been disconnected.`);
+    } catch (error) {
+      return callback(`Error disconnecting call: ${error}`);
+    }
+  }
+
   let to = "";
   let from = "";
   const displayName = event.displayName || event.callerId || 'Trusted%20Caller';  // Default to URL Encoded "Trusted Caller" if no display name is passed in
