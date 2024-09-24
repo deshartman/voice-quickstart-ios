@@ -1,12 +1,13 @@
 /**
- * This function places a call based on the type of "to" passed in
- * or disconnects an active call if a callSid is provided
+ * This function places a call based on the type of "to" passed in or disconnects an active call if a callSid is provided
+ * 
+ * Before using, set the CLIENT_CALL_URL environment variable to the URL that will be used to handle the call.
  * 
  * event.To = Dial a PSTN number
  * event.identity = Dial a Client
  * event.domain = Dial a SIP domain
  * event.callerId = Caller ID for the call
- * event.callSid = Disconnect an active call
+ * event.callSid = Pass in an active call SID to disconnect an active call
  * 
  * Usage:
  * ======
@@ -83,9 +84,8 @@ exports.handler = async function (context, event, callback) {
 
   // Create a new Client call
   try {
-    var url = 'https://twilio-retell-serverless-4508-dev.twil.io/start?agent_id=a5d4fc385db7892e2d98abacede2a11d'
     const call = await client.calls.create({
-      url: url,
+      url: context.CLIENT_CALL_URL, // URL to handle the call. Set in the Environment Variables
       to: `${to}?displayName=${displayName}`,
       from: from,
       parameter: {
