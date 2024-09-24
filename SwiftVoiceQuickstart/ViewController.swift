@@ -282,14 +282,14 @@ class ViewController: UIViewController {
     }
     
     func fetchAccessToken(identity: String, completion: @escaping (Bool) -> Void) {
-        guard let accessTokenServerURL = Bundle.main.object(forInfoDictionaryKey: "AccessTokenServerURL") as? String,
-              var urlComponents = URLComponents(string: accessTokenServerURL),
-              let identity = try? keychain.get("identity") else {
-            print("Invalid access token server URL or missing identity")
-            completion(false)
-            return
-        }
-        
+		guard let serverURLString = Bundle.main.object(forInfoDictionaryKey: "ServerURL") as? String,
+			  var urlComponents = URLComponents(string: serverURLString + "/access-token"),
+			  let identity = try? keychain.get("identity") else {
+			print("Invalid server URL or missing identity")
+			completion(false)
+			return
+		}
+		
         // Add identity as a query parameter
         urlComponents.queryItems = [URLQueryItem(name: "identity", value: identity)]
         
