@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const identityInput = document.getElementById("identity");
     const displayNameInput = document.getElementById("display-name");
-    const displayMessage = document.getElementById("display-message");
     const callButton = document.getElementById("call-button");
 
     const messageInput = document.getElementById('message');
@@ -33,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify({
                     identity: isCallActive ? '' : identity.value,
                     displayName: displayNameInput.value,
-                    displayMessage: displayMessage.value,
                     callSid: isCallActive ? currentCallSid : ''
                 }),
             });
