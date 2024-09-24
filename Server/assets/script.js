@@ -11,6 +11,57 @@ document.addEventListener('DOMContentLoaded', function () {
     let isCallActive = false;
     let currentCallSid = ''; // Variable to store the current Call SID
 
+    let statusPollInterval;
+
+    function startStatusPolling(callSid) {
+        statusPollInterval = setInterval(() => {
+            fetchCallStatus(callSid);
+        }, 1000); // Poll every 1 seconds
+    }
+
+    function stopStatusPolling() {
+        if (statusPollInterval) {
+            clearInterval(statusPollInterval);
+        }
+    }
+
+    async function fetchCallStatus(callSid) {
+        try {
+            const response = await fetch('/call-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ callSid: callSid }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                console.error('Error fetching call status:', data.error);
+                return;
+            }
+
+            displayStatus(`Call status: ${data.status}`);
+
+            if (data.status === 'completed') {
+                handleCallEnded();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function handleCallEnded() {
+        stopStatusPolling();
+        isCallActive = false;
+        callButton.textContent = 'Call';
+        callButton.classList.remove('hangup-button');
+        callButton.classList.add('call-button');
+        currentCallSid = '';
+        displayStatus('Call ended');
+    }
+
     function displayStatus(message, isError = false) {
         statusMessage.textContent = message;
         statusMessage.className = 'status-message ' + (isError ? 'error' : 'success');
@@ -52,15 +103,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const sidMatch = data.match(/call SID: (CA[a-f0-9]+)/);
                 if (sidMatch) {
                     currentCallSid = sidMatch[1]; // Store the Call SID in the variable
+                    startStatusPolling(currentCallSid);
                 }
                 displayStatus('Call initiated successfully');
             } else if (data.includes('has been disconnected')) {
-                isCallActive = false;
-                callButton.textContent = 'Call';
-                callButton.classList.remove('hangup-button');
-                callButton.classList.add('call-button');
-                currentCallSid = ''; // Clear the Call SID
-                displayStatus('Call ended');
+                handleCallEnded();
             }
         } catch (error) {
             console.error('Error:', error);
