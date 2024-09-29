@@ -108,7 +108,7 @@ APxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ### <a name="bullet4"></a>4. Generate an access token for the quickstart
 
 #### Swift Quickstart ####
-For the Swift Quickstart, you no longer need to manually generate an access token. The updated version will automatically generate the token using the above server /access_token endpoint within XCode Swift code. The only requirement is to update the info.plist "AccessTokenServerURL"
+For the Swift Quickstart, you no longer need to manually generate an access token. The updated version will automatically generate the token using the above server /access_token endpoint within XCode Swift code. The only requirement is to update the info.plist with the Server URL
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -118,8 +118,8 @@ For the Swift Quickstart, you no longer need to manually generate an access toke
     :
     :
     </array>
-    <key>AccessTokenServerURL</key>
-    <string>https://my-quickstart-dev.twil.io/access-token?identity=alice</string>
+    <key>ServerURL</key>
+    <string>https://my-quickstart-dev.twil.io</string>
 </dict>
 </plist>
 ```
