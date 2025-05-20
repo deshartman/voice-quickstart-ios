@@ -165,42 +165,80 @@ Build and run the app. Leave the text field empty and press the call button to s
 
 ### <a name="bullet6"></a>6. Create a Push Credential with your VoIP Service Certificate
 
-The Programmable Voice SDK uses Apple’s VoIP Services to let your application know when it is receiving an incoming call. If you want your users to receive incoming calls, you’ll need to enable VoIP Services in your application and generate a VoIP Services Certificate.
+The Programmable Voice SDK uses Apple's VoIP Services to let your application know when it is receiving an incoming call. If you want your users to receive incoming calls, you'll need to enable VoIP Services in your application and generate a VoIP Services Certificate.
 
-Go to [Apple Developer portal](https://developer.apple.com/) and generate a VoIP Service Certificate.
+#### Understanding Sandbox vs. Production Push Credentials
 
-Once you have generated the VoIP Services Certificate, you will need to provide the certificate and key to Twilio so that Twilio can send push notifications to your app on your behalf.
+When setting up push credentials for your iOS application, you need to understand the difference between sandbox and production environments:
 
-Export your VoIP Service Certificate as a `.p12` file from *Keychain Access* and extract the certificate and private key from the `.p12` file using the `openssl` command.
+- **Sandbox Environment**:
+  - Used during development and testing
+  - Works with development builds of your app
+  - Requires the `--sandbox` flag when creating the push credential
 
+- **Production Environment**:
+  - Used for App Store distribution
+  - Required for TestFlight builds
+  - Does not use the `--sandbox` flag when creating the push credential
+
+#### Setting Up Your Push Credentials
+
+1. Go to [Apple Developer portal](https://developer.apple.com/) and generate a VoIP Service Certificate.
+
+2. Once you have generated the VoIP Services Certificate, you will need to provide the certificate and key to Twilio so that Twilio can send push notifications to your app on your behalf.
+
+3. Export your VoIP Service Certificate as a `.p12` file from *Keychain Access* and extract the certificate and private key from the `.p12` file using the `openssl` command:
+
+```bash
 $ openssl pkcs12 -in PATH_TO_YOUR_P12 -nokeys -out cert.pem -nodes -legacy
 $ openssl x509 -in cert.pem -out cert.pem
 $ openssl pkcs12 -in PATH_TO_YOUR_P12 -nocerts -out key.pem -nodes -legacy
 $ openssl rsa -in key.pem -out key.pem
+```
 
-NOTE: using the -legacy flag is necessary to ensure that the certificate and key are in the correct format for Twilio.
+> **NOTE**: Using the `-legacy` flag is necessary to ensure that the certificate and key are in the correct format for Twilio.
 
-Use Twilio CLI to create a Push Credential using the cert and key.
+4. Use Twilio CLI to create a Push Credential using the cert and key:
 
+For Sandbox (Development):
+```bash
 $ twilio api:conversations:v1:credentials:create \
     --type=apn \
     --sandbox \
     --friendly-name="voice-push-credential (sandbox)" \
     --certificate="$(cat PATH_TO_CERT_PEM)" \
     --private-key="$(cat PATH_TO_KEY_PEM)"
-This will return a Push Credential SID that looks like this
+```
 
+For Production (App Store and TestFlight):
+```bash
+$ twilio api:conversations:v1:credentials:create \
+    --type=apn \
+    --friendly-name="voice-push-credential (production)" \
+    --certificate="$(cat PATH_TO_CERT_PEM)" \
+    --private-key="$(cat PATH_TO_KEY_PEM)"
+```
+
+This will return a Push Credential SID that looks like this:
+
+```
 CRxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
 The `--sandbox` option tells Twilio to send the notification requests to the sandbox endpoint of Apple's APNS service. Once the app is ready for distribution or store submission, create a separate Push Credential with a new VoIP Service certificate **without** the `--sandbox` option.
 
-**Note: we strongly recommend using different Twilio accounts (or subaccounts) to separate VoIP push notification requests for development and production apps.**
+**Note: We strongly recommend using different Twilio accounts (or subaccounts) to separate VoIP push notification requests for development and production apps.**
 
-Now let's generate another access token and add the Push Credential to the Voice Grant.
+5. Now let's generate another access token and add the Push Credential to the Voice Grant:
 
+```bash
 $ twilio token:voice \
     --identity=alice \
     --voice-app-sid=APxxxx \
     --push-credential-sid=CRxxxxs
+```
+
+<kbd><img width="500px" src="Images/Screenshot%202024-09-23%20at%2016.10.25.png"/></kbd>
 ### <a name="bullet7"></a>7. Receive an incoming call
 
 You are now ready to receive incoming calls. Update your app with the access token generated from step 6 and rebuild your app. The `TwilioVoiceSDK.register()` method will register your mobile client with the PushKit device token as well as the access token. Once registered, hit your application server's **/place-call** endpoint: `https://my-quickstart-dev.twil.io/place-call?to=alice`. This will trigger a Twilio REST API request that will make an inbound call to the identity registered on your mobile app. Once your app accepts the call, you should hear a congratulatory message.
@@ -233,6 +271,78 @@ Use the text field to specify the identity of the call receiver, then tap the "C
 To make client to number calls, first get a verified Twilio number to your account via https://www.twilio.com/console/phone-numbers/verified. Update your server code and replace the `callerNumber` variable with the verified number. Restart the server so it uses the new value.
 
 <kbd><img width="300px" src="https://github.com/twilio/voice-quickstart-ios/raw/master/Images/client-to-pstn.png"/></kbd>
+
+## Using the Application
+
+This section demonstrates how to use the application for making and receiving calls, including the trust verification process and custom messaging between clients.
+
+### Initial Setup
+
+When you first launch the application, you'll see the initial screen with your identity displayed or if you have not provided an identity, you will see the CHange Identity screen.
+
+<kbd><img width="300px" src="Images/IMG_2500.PNG"/></kbd>
+
+#### Changing the Client Identity
+
+You can change the client identity in the text field as shown below, which will then be used when being called. This is useful for testing purposes or if you want to use a different identity for the current session.
+
+<kbd><img width="300px" src="Images/IMG_2501.PNG"/></kbd>
+
+### Making and Receiving Calls
+
+#### Web Interface Trust Banner
+
+The web interface is used to initiate outbound calls to iOS devices. Fill in the identity of the client you would like to call.
+It also has a "Trusted Banner" at the top of the page, which is where you can fill in a trusted brand name. This will be displayed on the phone as shown below.
+Click the "Call" button. This will initiate a call to the specified identity.
+
+<kbd><img width="500px" src="Images/Screenshot%202025-05-20%20at%2014.25.36.png"/></kbd>
+
+#### Trusted iOS Calls
+
+When receiving calls on iOS, you'll see the trusted call interface shown below with the Trusted Message used on thw Web Interface. This is a great way to let the user know who is calling and why they should answer the call.
+
+<kbd><img width="300px" src="Images/IMG_2502.PNG"/></kbd>
+
+<kbd><img width="300px" src="Images/IMG_2503.PNG"/></kbd>
+
+### Custom Messaging Between Clients
+
+The application also supports sending custom messages between clients during an active call. This feature allows for real-time data exchange beyond just voice communication.
+
+#### Server-Side Messaging
+
+On the server side, you can send a message to a client during an active call. Here's an example of the server message interface:
+
+<kbd><img width="500px" src="Images/Screenshot%202025-05-20%20at%2014.27.50.png"/></kbd>
+
+#### iOS Message Display
+
+When a message is received on the iOS client, it's displayed in the interface at the bottom of the screen for example:
+
+<kbd><img width="300px" src="Images/IMG_2504.PNG"/></kbd>
+
+#### iOS Client Message Handling
+
+The iOS client can receive and process these messages through the `CallMessageDelegate` protocol implementation. When a message is received, it's logged and can be processed by your application logic:
+
+```swift
+func callDidReceiveMessage(call: Call, message callMessage: CallMessage) {
+    NSLog("callDidReceiveMessage method called for call SID: \(call.sid)")
+    NSLog("Received message: \(callMessage)")
+    
+    if let jsonData = callMessage.content.data(using: .utf8),
+       let json = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
+       let message = json["message"] as? String {
+        NSLog("Parsed message: \(message)")
+        // Handle the received message here
+    } else {
+        NSLog("Failed to parse message or unexpected format. Raw content: \(callMessage.content)")
+    }
+}
+```
+
+This enables rich interactions between clients, such as sharing status updates, coordinates, or other application-specific data during a call.
 
 ## <a name="examples"></a> Examples
 
@@ -325,45 +435,56 @@ func performAnswerVoiceCall(uuid: UUID, completionHandler: @escaping (Bool) -> V
 
 On the server side, you can send a message to the client during an active call using the send-message.js file once you have the call SID
 
-# Distribution #
-The next section will describe how to distribute the application via Testflight. This allows you to bundle up the package and distribute it to your testers. We will use external testers for this example.
+## Distribution
 
-1. set the version <DIAGRAM> and do a build clean
-2. Archive the application once done you will see the application in the Organizer <INSERT DIAGRAM HERE>
-3. Click the Distribute App button and select App Store Connect (This allows for external testers)
-4. Click distribute
-5. Once uploaded go to https://appstoreconnect.apple.com/ and log in using your Apple Developer creds
+This section describes how to distribute the application via TestFlight. This allows you to bundle up the package and distribute it to your testers. We will use external testers for this example.
+
+### Preparing Your App for TestFlight
+
+1. Set the version number in Xcode and do a build clean
+2. Archive the application. Once done, you will see the application in the Organizer
+   
+   <kbd><img width="500px" src="Images/Screenshot%202024-09-03%20at%2020.24.53.png"/></kbd>
+   
+3. Click the "Distribute App" button and select "App Store Connect" (This allows for external testers)
+4. Click "Distribute"
+5. Once uploaded, go to [App Store Connect](https://appstoreconnect.apple.com/) and log in using your Apple Developer credentials
 6. Click on the App Icon
-7. Click on the Testflight tab
+7. Click on the TestFlight tab
 8. Click on the build you just uploaded under the version
-9. Click on the external testers tab
+9. Click on the "External Testers" tab
 10. Click on the plus button to add a new group of users or individual tester
 11. Add the email address of the tester
-12. Click on the add button
-13. Click on the save button
-14. Click on the save button again
-15. Click on the notify button
-16. Click on the notify external testers button
-17. The tester will receive an email with a link to download the application
-18. The tester will need to download the Testflight app from the App Store
-19. The tester will need to click on the link in the email to download the application
-20. The tester will need to open the Testflight app and install the application
-21. The tester will need to open the application and test it
-22. The tester will need to provide feedback to the developer
+12. Click on the "Add" button
+13. Click on the "Save" button
+14. Click on the "Save" button again
+15. Click on the "Notify" button
+16. Click on the "Notify External Testers" button
 
-NOTE: Push notifications uses the Production certificate, rather than the Sandbox version, so you need to go to the Twilio Console and uncheck "sandbox."
+### TestFlight Push Notification Requirements
 
-1. Go to the Twilio Console
-2. Click on admin (right hand side)
-3. Click on Account Management
-4. Got to Keys & Credentials -> Credentials
-4. Click on the Push Credentials
-5. Click on the Push Credential you created
-6. Uncheck the Sandbox box
-7. Click on the Save button
+**Important**: TestFlight builds require production push credentials, not sandbox credentials.
 
-This will now use the same Credential SID, but via the Production path, which TestFlight needs. See here: Reference: https://www.twilio.com/docs/voice/ios/quickstart#push-credential
-& https://fluffy.es/remote-push-notification-testflight-app-store/
+<kbd><img width="500px" src="Images/update_push_credential.png"/></kbd>
+
+To update your push credential for TestFlight:
+
+1. Go to the [Twilio Console](https://www.twilio.com/console)
+2. Click on "Admin" (right-hand side)
+3. Click on "Account Management"
+4. Go to "Keys & Credentials" -> "Credentials"
+5. Click on the Push Credentials
+6. Click on the Push Credential you created
+7. **Uncheck** the "Sandbox" box
+8. Click on the "Save" button
+
+This will now use the same Credential SID, but via the Production path, which TestFlight requires. The iOS app doesn't need to be modified, but the push credential on Twilio's side must be set to production mode.
+
+<kbd><img width="300px" src="Images/IMG_2500.PNG"/></kbd>
+
+For more information, see:
+- [Twilio Push Credential Documentation](https://www.twilio.com/docs/voice/ios/quickstart#push-credential)
+- [Remote Push Notifications with TestFlight](https://fluffy.es/remote-push-notification-testflight-app-store/)
 
 
 ## Issues and Support
@@ -378,5 +499,3 @@ For general inquiries related to the Voice SDK you can [file a support ticket](h
 ## License
 
 MIT
-
-
